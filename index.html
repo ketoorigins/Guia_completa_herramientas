@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Keto Personalizada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #26143c 0%, #341b3b 100%);
+            background-attachment: fixed;
+            color: #C9D1D9;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2c3340;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a4252;
+        }
+        .active-link {
+            position: relative;
+            background-color: rgba(76, 147, 255, 0.1);
+        }
+        .active-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #4C93FF, #A64BFF);
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 15000px;
+            transition: max-height 1.5s ease-in;
+        }
+        .accordion-button svg {
+            transition: transform 0.3s ease;
+        }
+        .accordion-button.open svg {
+            transform: rotate(180deg);
+        }
+        .accordion-item {
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .accordion-item:hover {
+            border-color: #4C93FF;
+            box-shadow: 0 0 15px rgba(76, 147, 255, 0.25);
+        }
+        aside {
+            background-color: #332145;
+            border-right: 1px solid #484f58;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 288px;
+            z-index: 50;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        aside.open {
+            transform: translateX(0);
+        }
+        aside nav {
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            aside {
+                position: relative;
+                transform: translateX(0);
+                display: flex !important;
+            }
+        }
+        .consumo-info {
+            color: #DFFF00;
+            font-weight: 600;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(223, 255, 0, 0.05);
+            border-left: 3px solid #DFFF00;
+            border-radius: 4px;
+        }
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s;
+        }
+        .shopping-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .shopping-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            height: 1.25rem;
+            width: 1.25rem;
+            background-color: #30363d;
+            border: 1px solid #484f58;
+            border-radius: 0.25rem;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            display: grid;
+            place-content: center;
+        }
+        .shopping-item input[type="checkbox"]::before {
+            content: "";
+            width: 0.75rem;
+            height: 0.75rem;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em #4C93FF;
+            transform-origin: bottom left;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .shopping-item input[type="checkbox"]:checked::before {
+            transform: scale(1);
+        }
+        .shopping-item label {
+            cursor: pointer;
+        }
+        .footer-image-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 4rem;
+        }
+        .gradient-border {
+            padding: 3px;
+            border-radius: 9999px;
+            background: linear-gradient(to right, #f97316, #ec4899, #8b5cf6);
+        }
+        .footer-image {
+            width: 18rem;
+            height: 18rem;
+            border-radius: 9999px;
+            object-fit: cover;
+        }
+        #shopping-list-container {
+            column-count: 1;
+            column-gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            #shopping-list-container {
+                column-count: 2;
+            }
+        }
+        @media (min-width: 1024px) {
+            #shopping-list-container {
+                column-count: 3;
+            }
+        }
+        .shopping-category {
+            break-inside: avoid;
+            padding-bottom: 1rem;
+        }
+        .shopping-category h4 {
+            cursor: pointer;
+        }
+        .welcome-title {
+            background: linear-gradient(to right, #00FFFF, #FF00FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: none;
+        }
+        .recipe-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(to right, #581c87, #8a2be2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2), 0 0 10px rgba(138, 43, 226, 0.5);
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+        }
+        .recipe-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3), 0 0 15px rgba(138, 43, 226, 0.7);
+        }
+        .recipe-btn-img-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            border-radius: 9999px;
+            background: linear-gradient(to right, #d946ef, #8b5cf6);
+            margin-right: 1rem;
+            width: 72px;
+            height: 72px;
+            box-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+        }
+        .recipe-btn-img-inner {
+            background-color: #2a1735;
+            padding: 10px;
+            border-radius: 9999px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .recipe-btn-img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 9999px;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        .nav-button-asesorias {
+            position: relative;
+            z-index: 1;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            color: white !important;
+            border: none;
+            padding: 2px;
+            border-radius: 9999px;
+            display: block;
+            text-decoration: none;
+        }
+        .nav-button-asesorias-inner {
+            background: linear-gradient(to bottom right, #3A1C71, #6D439A);
+            padding: 0.75rem;
+            border-radius: 9999px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-button-asesorias:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+        }
+        .nav-button-asesorias.active-link::before {
+            width: 0;
+            background: none;
+        }
+        .physiology-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(to right, #007bff, #8a2be2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            margin-top: 1.5rem;
+        }
+        .physiology-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+            opacity: 0.9;
+        }
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, #26143c 0%, #341b3b 100%);
+            z-index: 50;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        @media (min-width: 768px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+        .menu-button {
+            background: linear-gradient(to right, #581c87, #8a2be2);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+        .menu-button:hover {
+             transform: translateY(-1px) scale(1.02);
+             box-shadow: 0 6px 10px rgba(0,0,0,0.3);
+        }
+        .menu-button svg {
+            margin-right: 0.5rem;
+        }
+        main {
+            margin-top: 0;
+        }
+        @media (max-width: 767px) {
+            main {
+                margin-top: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="mobile-header" class="mobile-header md:hidden">
+        <button id="menu-button" class="menu-button">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+            Contenido
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <aside id="mobile-nav" class="w-72 flex flex-col">
+            <div class="h-36 flex items-center justify-center border-b border-gray-800 flex-shrink-0 p-4">
+                <img src="https://i.ibb.co/20NypXdZ/ketoorigins.png" alt="Logo de Keto Origins" class="h-full w-auto">
+            </div>
+            <nav class="flex-grow px-4 py-6">
+                <ul class="space-y-1 text-sm" id="nav-menu">
+                    <li><a href="#introduccion" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">📖 Introducción</a></li>
+                    <li><a href="#breve-historia" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">📜 Breve historia de la Alimentación Keto</a></li>
+                    <li><a href="#como-funciona" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">⚙️ Cómo Funciona la Alimentación Keto</a></li>
+                    <li><a href="#entendiendo-ayuno" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🤔 Entendiendo el Ayuno Intermitente</a></li>
+                    <li><a href="#como-comenzar-ayuno" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🚀 ¿Cómo Comenzar con el Ayuno?</a></li>
+                    <li><a href="#consideraciones-ayuno" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">❗ Consideraciones Importantes</a></li>
+                    <li><a href="#beneficios-ayuno" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🌟 Beneficios del Ayuno Intermitente</a></li>
+                    <li><a href="#suplementos" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">💊 Suplementos Recomendados</a></li>
+                    <li><a href="#hidratacion" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">💧 Hidratación y Electrolitos</a></li>
+                    <li><a href="#keto-mejora-salud" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">❤️ Cómo Keto Puede Mejorar la Salud</a></li>
+                    <li><a href="#importancia-comidas" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🍽️ Frecuencia de Comidas</a></li>
+                    <li><a href="#consejos-reducir-comidas" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">📉 Consejos para reducir la frecuencia de comidas</a></li>
+                    <li><a href="#beneficios-reducir-comidas" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">✨ Beneficios de reducir frecuencia</a></li>
+                    <li><a href="#tips-cetosis" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">⚡ Tips para Entrar en Cetosis Rápido</a></li>
+                    <li><a href="#beneficios-keto" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🏆 Beneficios Keto</a></li>
+                    <li><a href="#estrategias-sociales" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🥂 Estrategias para Eventos Sociales</a></li>
+                    <li><a href="#lista-compras" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🛒 Lista de compras</a></li>
+                    <li><a href="#niveles-cetonas" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700">🧪 Niveles de Cetonas</a></li>
+                    <li>
+                        <a href="https://fisiosem.my.canva.site/keto-origins-" target="_blank" class="nav-button-asesorias rounded-full text-white font-bold mt-2">
+                           <div class="nav-button-asesorias-inner">
+                                <span class="mr-2">💎</span> Nuestras Asesorías Keto
+                           </div>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main id="main-content" class="flex-1 p-6 md:p-10 overflow-y-auto">
+            
+            <section id="introduccion" class="content-section">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>📖 Introducción</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>El metabolismo no es simplemente una serie de reacciones químicas para producir energía. Es el lenguaje fundamental con el que tu cuerpo se comunica, la sinfonía silenciosa que dicta cada latido, cada pensamiento y cada movimiento.</p>
+                        <p>Se han dedicado años de estudio para a descifrar este código, no solo para entender las enfermedades, sino para descubrir el potencial ilimitado de la salud humana. He visto cómo pequeños cambios en la nutrición, el sueño o el ejercicio pueden transformar vidas por completo, revirtiendo lo que se creía irreversible. El metabolismo es tu mapa genético en acción, un sistema dinámico que está en constante diálogo con tu entorno.</p>
+                        <p>Te invito a dejar de ver a tu cuerpo como una máquina que solo necesita combustible, y a empezar a verlo como un jardín que necesita cuidado, atención y la sabiduría para florecer. Entender tu metabolismo es el primer paso para desbloquear tu verdadera vitalidad, para liberarte de las limitaciones y para construir una salud que no solo te permita vivir, sino prosperar. Esta no es solo una disciplina científica; es una llave hacia una vida más plena y consciente.</p>
+                    </div></div>
+                </div>
+                <div class="text-center my-10 px-4">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold leading-tight mb-2">
+                        <span class="welcome-title">¡BIENVENIDO/A A NUESTRA GUÍA PASO A PASO DE CÓMO LLEVAR UNA ALIMENTACIÓN CETOGÉNICA DE MANERA EFECTIVA!</span>
+                    </h2>
+                    <h3 class="text-2xl font-bold text-white mb-4">
+                        CON KETO Origins 🥑🥥✨
+                    </h3>
+                    <p class="text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
+                        ESTAMOS INCREIBLEMENTE EMOCIONADOS DE ACOMPAÑARTE EN ESTE VIAJE HACIA UN ESTILO DE VIDA MÁS SALUDABLE Y LLENO DE ENERGÍA. ¡PREPÁRATE PARA TRANSFORMAR TU METABOLISMO Y DESCUBRIR TODO EL PODER DE LA ALIMENTACIÓN CETOGÉNICA! ¡VAMOS A EMPEZAR! 🎉
+                    </p>
+                </div>
+            </section>
+
+            <section id="breve-historia" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>📜 Breve historia de la Alimentación Keto</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>📜 Aunque hoy es reconocida por sus efectos en la composición corporal, la dieta cetogénica nació en un contexto puramente clínico. En la década de 1920, el Dr. Russell Wilder de la Clínica Mayo la diseñó como una intervención terapéutica para la epilepsia refractaria, especialmente en niños. El objetivo era replicar los efectos anticonvulsivos del ayuno, que se conocían desde la antigüedad, pero de una manera sostenible a largo plazo. 🧑‍⚕️</p>
+                        <p>Con la llegada de los fármacos anticonvulsivos en las décadas siguientes, su uso clínico disminuyó drásticamente. Sin embargo, la investigación nunca se detuvo. Su resurgimiento a finales del siglo XX, impulsado por el trabajo de investigadores como Stephen Phinney y Jeff Volek, la reposicionó como una poderosa herramienta para abordar la resistencia a la insulina, el síndrome metabólico y la optimización del rendimiento. Hoy, la vemos no solo como una dieta, sino como un campo de estudio sobre la flexibilidad metabólica humana. 🔬🧠</p>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="como-funciona" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>⚙️ Cómo Funciona la Alimentación Keto</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>El funcionamiento de esta intervención metabólica se basa en un cambio magistral de la fuente de energía primaria del cuerpo. En un estado alimentado por carbohidratos, nuestro organismo opera en **glicólisis**, utilizando glucosa como combustible principal ⛽. Al restringir drásticamente la ingesta de carbohidratos (generalmente por debajo de 30g netos diarios), las reservas de glucógeno en el hígado y los músculos se agotan en 24-48 horas.</p>
+                        <p>Esta depleción de glucógeno provoca una caída drástica en los niveles de la hormona **insulina** 📉, la principal reguladora del almacenamiento de energía. En respuesta, la hormona contrarreguladora, el **glucagón**, se eleva, señalando al cuerpo que libere las grasas almacenadas de los adipocitos (lipólisis).</p>
+                        <p>Estos ácidos grasos liberados viajan al hígado, donde a través de un proceso llamado **beta-oxidación**, son descompuestos en Acetil-CoA. Cuando la cantidad de Acetil-CoA supera la capacidad del ciclo de Krebs, el hígado inicia la **cetogénesis**: la conversión de este exceso en **cuerpos cetónicos** (beta-hidroxibutirato, acetoacetato y acetona) 🔥.</p>
+                        <p>Estos cuerpos cetónicos son liberados al torrente sanguíneo y se convierten en una fuente de energía altamente eficiente y preferida por órganos como el corazón ❤️ y, crucialmente, el cerebro 🧠, que no puede usar directamente los ácidos grasos. Así, el cuerpo pasa de ser una máquina de quemar azúcar a una eficiente máquina de quemar grasa.</p>
+                    </div></div>
+                </div>
+            </section>
+            
+            <section id="entendiendo-ayuno" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>🤔 Entendiendo el ayuno intermitente</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <h4 class="font-semibold text-white">Entendiendo el Ayuno Intermitente: Una Herramienta de Modulación Metabólica ⚙️</h4>
+                            <p>Más allá de ser un simple patrón alimentario, el Ayuno Intermitente (AI) debe ser comprendido como una estrategia de temporización nutricional que ejerce una profunda influencia en la regulación hormonal y el metabolismo celular. Su poder no reside en la restricción calórica inherente, sino en la creación de períodos controlados sin ingesta de alimentos. Esta alternancia entre el estado de alimentación (postprandial) y el estado de ayuno permite que el cuerpo transite de un modo de "almacenamiento de energía" a un modo de "uso de reservas y reparación celular".</p>
+                            <p>Durante la ventana de alimentación, el organismo se enfoca en la digestión, absorción y almacenamiento de nutrientes, un proceso que está mediado principalmente por la insulina. Sin embargo, es en la ventana de ayuno donde ocurren los cambios metabólicos más significativos y beneficiosos. A medida que los niveles de glucosa en sangre descienden, la secreción de insulina disminuye drásticamente. Esta caída de la insulina es la señal hormonal que desbloquea una serie de cascadas metabólicas cruciales.</p>
+                            <h4 class="font-semibold text-white">Sinergia Metabólica con la Dieta Cetogénica 🤝</h4>
+                            <p>La combinación de la dieta cetogénica y el ayuno intermitente representa una poderosa sinergia metabólica. Si bien la dieta cetogénica logra una supresión sostenida de la insulina al restringir la ingesta de carbohidratos, el ayuno intermitente lleva esta supresión a un nivel más profundo y agudo durante sus períodos sin ingesta. Este efecto sinérgico maximiza los beneficios y acelera la adaptación metabólica.</p>
+                            <p>Esta supresión maximizada de la insulina genera un entorno hormonal ideal para:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Aceleración de la Cetogénesis 🔥:</b> Con la insulina en niveles basales, el páncreas libera glucagón, la hormona antagonista de la insulina. La relación insulina/glucagón se invierte, lo que envía una señal al hígado para que inicie la cetogénesis. Este proceso implica la conversión de ácidos grasos liberados del tejido adiposo en cuerpos cetónicos (beta-hidroxibutirato, acetoacetato y acetona). La ausencia de glucosa como fuente de energía principal fuerza al hígado a producir cetonas de manera altamente eficiente para alimentar al cerebro y otros tejidos.</li>
+                                <li><b>Potenciación de la Lipólisis:</b> La baja insulina no solo facilita la cetogénesis, sino que también es el catalizador principal de la lipólisis, el proceso de descomposición de los triglicéridos almacenados en las células de grasa (adipocitos). La inhibición de la insulina permite que enzimas como la lipasa sensible a hormonas (LSH) se activen, liberando ácidos grasos a la circulación sanguínea para que sean utilizados como combustible.</li>
+                                <li><b>Activación de la Vía AMPK 🔬:</b> El ayuno, especialmente en combinación con la restricción de carbohidratos, actúa como un potente activador de la proteína quinasa activada por AMP (AMPK). La AMPK es conocida como el "interruptor metabólico maestro" del cuerpo. Su activación promueve el catabolismo (descomposición) de los sustratos energéticos, incluyendo la oxidación de ácidos grasos y la autofagia. Al mismo tiempo, la AMPK inhibe la vía mTOR (objetivo de rapamicina en mamíferos), que está asociada con procesos anabólicos, crecimiento celular y almacenamiento de energía. Esta modulación dual (activación de AMPK e inhibición de mTOR) crea un estado celular óptimo para la reparación, la "limpieza" celular y la quema de grasa.</li>
+                            </ul>
+                            <p>En esencia, la dieta cetogénica y el ayuno intermitente no son meramente aditivos, sino que actúan de manera complementaria. La dieta cetogénica establece el estado metabólico de base, asegurando una fuente constante de ácidos grasos para la cetogénesis. El ayuno intermitente, por su parte, amplifica y optimiza los beneficios al crear períodos de máxima supresión insulínica, lo que acelera la transición y profundiza los beneficios de la cetosis nutricional.</p>
+                        </div>
+                         <div class="flex justify-center p-5 border-t border-gray-700">
+                            <a href="https://fisiosem.my.canva.site/fisiologia-y-bioquimica-en-el-ayuno" target="_blank" class="physiology-button">
+                                Fisiología y bioquímica en el ayuno
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="como-comenzar-ayuno" class="content-section hidden">
+                <h2 class="text-2xl font-bold text-white mb-4">🚀 ¿Cómo Comenzar con el Ayuno?</h2>
+                <p class="mb-6 text-gray-400">Cada protocolo de ayuno intermitente es una intervención clínica precisa, diseñada para distintos niveles de adaptación metabólica y objetivos. La clave es una progresión lógica y una atenta escucha a la retroalimentación biológica de su cuerpo (biofeedback). 🧘‍♀️</p>
+                <div class="space-y-4">
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>1️⃣ Protocolo 12/12: La base del ayuno intermitente 🧘‍♀️</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <h4 class="font-semibold text-white">Introducción</h4>
+                            <p>El ayuno 12/12 es la forma más accesible y menos restrictiva de ayuno intermitente. Es un reajuste de hábitos que se alinea con los ritmos circadianos naturales del cuerpo, y un excelente punto de partida para quienes desean explorar los beneficios del ayuno sin un compromiso significativo.</p>
+                            
+                            <h4 class="font-semibold text-white">¿Para quién está pensado?</h4>
+                            <p>Este protocolo es ideal para principiantes absolutos 🐣, personas que buscan una mejora gradual en su salud metabólica sin sentir privación, o aquellos que desean optimizar la digestión y el descanso nocturno.</p>
+
+                            <h4 class="font-semibold text-white">Definición completa</h4>
+                            <p>Consiste en un período de 12 horas de ayuno, seguido de una ventana de 12 horas para comer. Por ejemplo, si tu última comida es a las 8 p.m. ⏰, la primera del día siguiente (el desayuno) sería a las 8 a.m. Este patrón de alimentación es muy similar a lo que muchos ya hacen, pero con una conciencia y disciplina específicas sobre los horarios.</p>
+
+                            <h4 class="font-semibold text-white">Efectos fisiológicos y bioquímicos</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Activación incipiente de la autofagia:</b> Aunque no tan potente como en ayunos más largos, este protocolo permite que el cuerpo inicie procesos de autofagia ✨, un mecanismo de limpieza celular que recicla componentes dañados.</li>
+                                <li><b>Regulación de la insulina:</b> Al no comer durante 12 horas, los niveles de insulina se estabilizan, mejorando la sensibilidad a esta hormona y previniendo la resistencia a la insulina.</li>
+                                <li><b>Optimización del sueño:</b> No ingerir alimentos antes de dormir permite que el sistema digestivo descanse, lo que puede mejorar la calidad del sueño y la reparación celular nocturna. 😴</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Beneficios</h4>
+                             <ul class="list-disc list-inside space-y-2">
+                                <li><b>Mejora Integral de la Digestión:</b> El descanso prolongado del sistema digestivo reduce la hinchazón, el malestar y la inflamación, permitiendo una mejor absorción de nutrientes en tu ventana de alimentación.</li>
+                                <li><b>Optimización del Descanso:</b> Al no tener que procesar alimentos durante la noche, el cuerpo puede destinar más energía a procesos de reparación y regeneración, lo que se traduce en un sueño más profundo y reparador.</li>
+                                <li><b>Mejora de la Sensibilidad a la Insulina:</b> El período de ayuno permite que los niveles de insulina se estabilicen, lo que previene la resistencia a la insulina, un factor clave en la prevención de enfermedades metabólicas y en la gestión del peso.</li>
+                                <li><b>Pérdida de Peso Gradual y Sostenible:</b> Aunque sutil, este protocolo ayuda a reducir la ingesta calórica al eliminar comidas nocturnas innecesarias y fomenta el uso de la grasa como energía.</li>
+                                <li><b>Establecimiento de una Relación Saludable con la Comida:</b> Te enseña a reconocer las verdaderas señales de hambre y saciedad de tu cuerpo, sentando las bases para hábitos alimenticios más conscientes.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Cómo llevarlo a cabo (Paso a paso)</h4>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li><b>Define tu ventana de ayuno:</b> Elige un horario que se ajuste a tu vida diaria, por ejemplo, de 8 p.m. a 8 a.m.</li>
+                                <li><b>Última comida:</b> Que tu cena sea nutritiva y saciante para evitar la tentación de comer después. 😋</li>
+                                <li><b>Hidratación:</b> Es fundamental el tipo de agua que bebes. Te recomiendo agua mineral con una pizca de sal de mar y un chorrito de limón. El agua purificada o de osmosis inversa, al ser desmineralizada, no hidrata de forma efectiva a nivel celular e incluso puede arrastrar minerales de tu cuerpo.</li>
+                                <li><b>Cómo se hidrata la célula y se mantiene la homeostasis hídrica:</b> La homeostasis hídrica a nivel celular se logra gracias a un delicado equilibrio de electrolitos, principalmente el sodio (que se encuentra en el exterior de la célula) y el potasio (en el interior). Estos iones trabajan juntos a través de un mecanismo de transporte activo llamado la bomba de sodio-potasio, que utiliza energía para mover los iones a través de la membrana celular. Este proceso regula la presión osmótica, que es la fuerza que permite que el agua entre y salga de la célula a través de canales específicos llamados acuaporinas. Cuando consumes agua con electrolitos (como la sal de mar), proporcionas los iones necesarios para que este equilibrio funcione, permitiendo una hidratación profunda y funcional.</li>
+                                <li><b>Romper el ayuno:</b> La forma ideal es con algo que no genere un pico de insulina. La recomendación principal es un caldo de huesos casero. Este elixir ancestral es una fuente concentrada de nutrientes biodisponibles que no solo te rehidrata y repone electrolitos, sino que también aporta proteínas esenciales y aminoácidos que preparan al cuerpo para la siguiente comida.</li>
+                                <li><b>¿Por qué es crucial romper el ayuno con caldo de huesos?</b> Después de un período de ayuno, tu sistema digestivo está en un estado de reposo. Introducir una comida sólida o azúcares de golpe puede causar un shock metabólico, provocando hinchazón, malestar y un pico de insulina que anula los beneficios del ayuno. El caldo de huesos es la opción ideal porque es un líquido nutritivo, fácil de digerir y rico en compuestos restauradores.</li>
+                                <li><b>¿Qué son y para qué sirven el colágeno y la elastina?</b> Son las proteínas estructurales más abundantes en nuestro cuerpo. El colágeno es una proteína fibrosa que provee resistencia, firmeza y estructura a la piel, huesos, tendones y cartílagos. Piensa en él como el "esqueleto" que sostiene nuestros tejidos. La elastina, por otro lado, es una proteína que, como su nombre lo indica, confiere elasticidad. Permite que los tejidos (como la piel, los vasos sanguíneos y los pulmones) se estiren y vuelvan a su forma original.</li>
+                                <li><b>¿Qué aminoácidos contiene el caldo de huesos?</b> Es rico en glicina, prolina y glutamina. La glicina y la prolina son los principales componentes del colágeno, esenciales para la reparación de la piel y los tejidos conectivos. La glutamina es un potente nutriente para las células intestinales (enterocitos), ayudando a reparar la mucosa y reducir la inflamación, lo que es vital para un sistema digestivo que acaba de salir del ayuno.</li>
+                                <li>Si el caldo no es una opción, puedes optar por proteínas de fácil digestión como huevos revueltos con aguacate, o un puñado de frutos secos como nueces o almendras.</li>
+                            </ol>
+                            
+                            <div class="consumo-info">
+                                <b>Consejo de un profesional</b><br>
+                                El 12/12 es una práctica de conciencia. Prestar atención a las señales de hambre y saciedad es tan importante como el horario en sí. Este es su punto de partida para una relación más sana con la comida. 🍏
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>2️⃣ Protocolo 14/10: Un paso más allá 🚀</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <h4 class="font-semibold text-white">Introducción</h4>
+                            <p>El protocolo 14/10 es el siguiente escalón natural después del 12/12. Al alargar la ventana de ayuno en solo dos horas, se potencian los efectos metabólicos y se obtiene una mayor eficiencia en la quema de grasas. 🔥</p>
+                            
+                            <h4 class="font-semibold text-white">¿Para quién está pensado?</h4>
+                            <p>Ideal para personas que ya se sienten cómodas con el 12/12 y buscan mayores beneficios. También es muy adecuado para quienes tienen un horario laboral o familiar que dificulta ayunos más largos.</p>
+
+                            <h4 class="font-semibold text-white">Definición completa</h4>
+                            <p>Consiste en 14 horas de ayuno y una ventana de 10 horas para comer. Este ligero ajuste suele significar omitir una pequeña merienda nocturna o adelantar la cena, lo cual, para muchos, es perfectamente manejable.</p>
+
+                            <h4 class="font-semibold text-white">Efectos fisiológicos y bioquímicos</h4>
+                             <ul class="list-disc list-inside space-y-2">
+                                <li><b>Mayor movilización de grasa:</b> Al extender el ayuno, el cuerpo tiene más tiempo para agotar sus reservas de glucógeno y empezar a usar la grasa almacenada como fuente de energía.</li>
+                                <li><b>Activación completa de la autofagia y la apoptosis:</b> Es crucial destacar que entre las horas 14 y 16 de ayuno, se activa de forma completa la autofagia y la apoptosis.</li>
+                                <li><b>¿Qué es la autofagia?</b> Es un proceso biológico fundamental, conocido como el "autocanibalismo" celular. La célula descompone y recicla sus propios componentes dañados, viejos o disfuncionales, como orgánulos defectuosos, proteínas mal plegadas y bacterias invasoras. Activar la autofagia es como una limpieza profunda que promueve la longevidad y la salud celular.</li>
+                                <li><b>¿Qué es la apoptosis?</b> Es el mecanismo de "muerte celular programada". A diferencia de la necrosis (muerte celular accidental), la apoptosis es un proceso controlado y ordenado por el cual el cuerpo elimina células que ya no son necesarias o que están gravemente dañadas. Es esencial para el desarrollo, la función inmunológica y la prevención del cáncer.</li>
+                                <li><b>Estabilización del azúcar en sangre:</b> La ventana de ayuno más larga permite un mejor control de la glucosa y la insulina, reduciendo picos y valles que generan antojos.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Beneficios</h4>
+                             <ul class="list-disc list-inside space-y-2">
+                                <li><b>Pérdida de Peso y Grasa Corporal:</b> Al prolongar el ayuno, el cuerpo tiene más tiempo para movilizar las reservas de grasa, lo que se traduce en una pérdida de peso más eficiente, especialmente de la grasa visceral.</li>
+                                <li><b>Mejora en la Energía y el Enfoque Mental:</b> La quema de grasa como combustible proporciona una fuente de energía más estable que los carbohidratos, lo que elimina los picos y valles de energía y mejora la claridad mental.</li>
+                                <li><b>Reducción de la Resistencia a la Insulina:</b> El ayuno más largo permite una mejor regulación de la insulina, mejorando la respuesta del cuerpo a esta hormona y disminuyendo el riesgo de diabetes tipo 2.</li>
+                                <li><b>Salud Celular y Longevidad:</b> Al activar la autofagia y la apoptosis, este protocolo promueve una limpieza y renovación celular profunda, lo que puede contribuir a la longevidad y a la prevención de enfermedades degenerativas.</li>
+                                <li><b>Mejora en la Digestión:</b> El ayuno prolongado da un descanso más completo al sistema digestivo, lo que mejora la motilidad intestinal, reduce la inflamación y optimiza la función del microbioma.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Cómo llevarlo a cabo (Paso a paso)</h4>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li><b>Ajusta tu horario:</b> Si tu ventana de comida era de 8 a.m. a 8 p.m., ahora podría ser de 10 a.m. a 8 p.m. (10 horas) o de 9 a.m. a 7 p.m.</li>
+                                <li><b>Mantén la hidratación:</b> Para una hidratación celular óptima, consume agua mineral con sal de mar y limón. El proceso de hidratación celular es un sofisticado mecanismo de homeostasis hídrica mediado por el equilibrio de electrolitos. La bomba de sodio-potasio es un componente clave, regulando el paso del agua a través de los canales de la membrana celular (las acuaporinas). La sal de mar aporta los minerales (sodio, potasio y magnesio) que actúan como cofactores en este proceso.</li>
+                                <li><b>Romper el ayuno:</b> La mejor opción para romper el ayuno de 14 horas es con una taza de caldo de huesos. Su riqueza en colágeno, elastina y aminoácidos como la glicina, prolina y glutamina, prepara el sistema digestivo sin causar una respuesta inflamatoria o un pico de azúcar. La glutamina nutre el revestimiento intestinal, mientras que el colágeno y la elastina aportan los "ladrillos" para reparar los tejidos. Si el caldo de huesos no es viable, puedes optar por un batido con vegetales de hoja, palta y un poco de proteína en polvo sin sabor, o un puñado de frutos secos.</li>
+                            </ol>
+                            
+                            <div class="consumo-info">
+                                <b>Consejo de un profesional</b><br>
+                                El 14/10 es donde muchos empiezan a notar un cambio real. Mi recomendación es escuchar a tu cuerpo. Si te sientes fatigado o con hambre excesiva, puede ser señal de que no estás comiendo lo suficiente o de que necesitas más tiempo de adaptación. La calidad de los alimentos 🥗 sigue siendo la prioridad.
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>3️⃣ Protocolo 16/8: El estándar de oro ✨</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <h4 class="font-semibold text-white">Introducción</h4>
+                            <p>El 16/8 es, sin duda, el protocolo más popular y estudiado. Es una herramienta poderosa para mejorar la salud metabólica, la composición corporal y la longevidad, y el punto medio ideal entre la facilidad de los ayunos cortos y los beneficios profundos de los más largos.</p>
+                            
+                            <h4 class="font-semibold text-white">¿Para quién está pensado?</h4>
+                            <p>Este protocolo está dirigido a personas que buscan resultados significativos en la pérdida de peso, la mejora de la sensibilidad a la insulina y una optimización general de su salud metabólica. Es ideal para aquellos que ya tienen experiencia y desean llevar sus resultados al siguiente nivel.</p>
+
+                            <h4 class="font-semibold text-white">Definición completa</h4>
+                            <p>Consiste en 16 horas de ayuno, seguidas de una ventana de alimentación de 8 horas. Esto generalmente implica saltarse el desayuno o la cena, lo que concentra las comidas en un período más corto del día.</p>
+
+                            <h4 class="font-semibold text-white">Efectos fisiológicos y bioquímicos</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Cambio metabólico (Switch metabólico):</b> Las 16 horas son suficientes para que el cuerpo agote completamente las reservas de glucógeno y comience a producir cuerpos cetónicos a partir de la grasa, entrando en un estado de cetosis leve. ⛽</li>
+                                <li><b>Autofagia y apoptosis maximizadas:</b> Al igual que en el protocolo 14/10, pero con una duración más prolongada, este ayuno maximiza el proceso de autofagia (el mecanismo de limpieza celular) y la apoptosis (la muerte celular programada para eliminar células dañadas o no deseadas). La ventana de 14 a 16 horas es el punto en el que estos procesos se activan de forma más potente y eficiente, promoviendo la producción de nuevas mitocondrias y limpiando células dañadas.</li>
+                                <li><b>Hormona del crecimiento (GH):</b> Se ha demostrado que este ayuno aumenta la producción de la hormona del crecimiento, lo que ayuda a preservar la masa muscular 💪 y a quemar grasa.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Beneficios</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Pérdida de Grasa Visceral:</b> Este es uno de los beneficios más buscados. El 16/8 es extremadamente efectivo para reducir la grasa abdominal, la cual está asociada con un mayor riesgo de enfermedades metabólicas.</li>
+                                <li><b>Optimización de la Sensibilidad a la Insulina:</b> Este protocolo mejora drásticamente la respuesta del cuerpo a la insulina, lo que es fundamental para prevenir la diabetes tipo 2 y para el control de los niveles de azúcar en sangre.</li>
+                                <li><b>Claridad Mental y Enfoque:</b> Al producir cetonas, el cerebro tiene una fuente de energía más limpia y estable que la glucosa, lo que mejora la concentración, la memoria y la función cognitiva en general.</li>
+                                <li><b>Aumento de la Hormona del Crecimiento:</b> La liberación de esta hormona no solo ayuda a quemar grasa, sino que también es crucial para la reparación de tejidos y la preservación de la masa muscular, lo que lo hace ideal para quienes buscan mejorar su composición corporal.</li>
+                                <li><b>Reducción de la Inflamación Sistémica:</b> El ayuno de 16 horas reduce los marcadores inflamatorios en el cuerpo, lo que puede aliviar síntomas de enfermedades crónicas y mejorar el bienestar general.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Cómo llevarlo a cabo (Paso a paso)</h4>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li><b>Define tu ventana de alimentación:</b> Un horario común es de 12 p.m. a 8 p.m., omitiendo el desayuno.</li>
+                                <li><b>Planifica tus comidas:</b> Dentro de tu ventana de 8 horas, come dos o tres comidas nutritivas. No caigas en la trampa de comer de forma descontrolada.</li>
+                                <li><b>Hidratación y electrolitos:</b> La hidratación con electrolitos es crucial. Recomiendo el consumo de agua mineral con una pizca de sal de mar y limón. Los minerales clave de la sal, como el sodio, potasio, calcio y magnesio, son los que mantienen el equilibrio de fluidos y previenen síntomas de deshidratación. El sodio y el potasio son los iones principales responsables de la homeostasis hídrica a nivel celular, permitiendo que el agua penetre y salga de las células de manera eficiente, lo que se traduce en una verdadera hidratación. Sin estos electrolitos, el agua simplemente pasa a través de ti sin ser aprovechada. 🧂</li>
+                                <li><b>Romper el ayuno:</b> Para un ayuno de 16 horas, el caldo de huesos es el ritual de reaprovisionamiento. Su composición es ideal, aportando colágeno y elastina para dar resistencia y elasticidad a los tejidos. También aporta aminoácidos como la glicina, prolina y glutamina que nutren la pared intestinal y ayudan a la reparación de los tejidos conectivos. Otras opciones incluyen proteínas magras como huevos revueltos con aguacate, o un plato de vegetales fermentados para repoblar la flora intestinal.</li>
+                            </ol>
+                            
+                            <div class="consumo-info">
+                                <b>Consejo de un profesional</b><br>
+                                El 16/8 no es una licencia para comer de forma insalubre. Para obtener los máximos beneficios, la calidad de los alimentos es primordial. Combina este protocolo con una dieta rica en proteínas, grasas saludables y vegetales, y verás cómo tu cuerpo se transforma.
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>4️⃣ OMAD: One Meal a Day (Una comida al día) 🍽️</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <h4 class="font-semibold text-white">Introducción</h4>
+                            <p>OMAD es la forma más extrema de ayuno intermitente diario. Es un protocolo avanzado que requiere una gran disciplina y una adaptación previa. Es la culminación de la disciplina del ayuno y ofrece los beneficios más profundos, pero también es el más exigente. 🧗‍♂️</p>
+
+                            <h4 class="font-semibold text-white">¿Para quién está pensado?</h4>
+                            <p>Este método está reservado para ayunadores experimentados que buscan maximizar la autofagia, la quema de grasa y los beneficios de la cetosis. No se recomienda para principiantes y debe abordarse con precaución, idealmente bajo la guía de un profesional.</p>
+
+                            <h4 class="font-semibold text-white">Definición completa</h4>
+                            <p>OMAD implica ayunar durante aproximadamente 23 horas y consumir todas las calorías diarias en una única comida de una hora. Esto no significa que debas comer hasta la saciedad o ingerir alimentos poco nutritivos; la calidad de esa única comida es de vital importancia.</p>
+
+                            <h4 class="font-semibold text-white">Efectos fisiológicos y bioquímicos</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Cetosis profunda y sostenida:</b> El ayuno de 23 horas asegura que el cuerpo permanezca en un estado de cetosis, quemando grasa de forma constante para obtener energía.</li>
+                                <li><b>Máxima autofagia:</b> Este es el protocolo que más potencia la autofagia, promoviendo una limpieza celular y una longevidad excepcionales.</li>
+                                <li><b>Regulación hormonal intensa:</b> OMAD provoca una liberación significativa de hormona del crecimiento y una supresión prolongada de la insulina, creando un entorno anabólico y de quema de grasa ideal. 📈</li>
+                                <li><b>Impacto en la grelina:</b> Ayuda a regular la grelina, la hormona del hambre, haciendo que el cuerpo se adapte a una sensación de saciedad más duradera.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Beneficios</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Máxima Eficiencia en la Pérdida de Grasa:</b> OMAD es el protocolo más potente para agotar las reservas de glucógeno y obligar al cuerpo a utilizar la grasa almacenada como su principal fuente de energía, lo que resulta en una pérdida de peso y grasa extremadamente rápida.</li>
+                                <li><b>Mejora Extrema de la Sensibilidad a la Insulina:</b> Al reducir la frecuencia de las comidas a una sola vez al día, los niveles de insulina se mantienen bajos y estables durante la mayor parte del tiempo, lo que optimiza la sensibilidad a la insulina de manera significativa.</li>
+                                <li><b>Autofagia y Renovación Celular Profunda:</b> El ayuno de 23 horas lleva los procesos de autofagia y apoptosis a su máxima expresión, lo que permite una limpieza y regeneración celular sin precedentes, combatiendo el envejecimiento y previniendo el daño celular.</li>
+                                <li><b>Claridad Mental y Enfoque Sostenido:</b> La producción sostenida de cuerpos cetónicos como combustible para el cerebro promueve una agudeza mental, concentración y claridad que muchos describen como un "súper poder" cognitivo.</li>
+                                <li><b>Simplificación y Disciplina:</b> OMAD elimina la necesidad de planificar múltiples comidas, fomentando la disciplina y un control total sobre cuándo y qué se come, liberando tiempo y energía mental.</li>
+                            </ul>
+
+                            <h4 class="font-semibold text-white">Cómo llevarlo a cabo (Paso a paso)</h4>
+                             <ol class="list-decimal list-inside space-y-2">
+                                <li><b>Adapta tu cuerpo:</b> No saltes directamente a OMAD. Empieza con 16/8 y aumenta gradualmente el tiempo de ayuno.</li>
+                                <li><b>Planifica tu única comida:</b> Asegúrate de que esta comida sea densa en nutrientes. Debe contener proteínas de alta calidad, grasas saludables, y vegetales. 🥦</li>
+                                <li><b>Escucha a tu cuerpo:</b> Si experimentas mareos, debilidad o cualquier otro síntoma alarmante, detén el protocolo. OMAD no es para todos.</li>
+                                <li><b>Hidratación y electrolitos:</b> En un ayuno tan prolongado, la hidratación es de vital importancia. Bebe agua mineral con sal de mar y limón. Es crucial usar agua mineral, ya que la purificada no hidrata correctamente; de hecho, puede lixiviar los minerales esenciales de tu cuerpo. Los iones (sodio, potasio, calcio, magnesio) de la sal de mar son esenciales para la homeostasis hídrica celular. El sodio y el potasio trabajan en conjunto en la famosa "bomba de sodio-potasio" para mantener el equilibrio de líquidos, permitiendo la correcta función nerviosa, muscular y de transporte de nutrientes. Hidratar a la célula es diferente a simplemente beber agua, y la presencia de estos electrolitos es lo que asegura una verdadera hidratación. 🥣</li>
+                                <li><b>Romper el ayuno:</b> En OMAD, la forma de romper el ayuno es lo más crucial. Un ayuno tan largo deja el sistema digestivo muy sensible. Mi recomendación principal es comenzar la ventana de alimentación con una taza de caldo de huesos caliente. Este no solo te rehidrata y repone electrolitos de forma inmediata, sino que también aporta colágeno y elastina, que son restauradores del tejido conectivo y de la pared intestinal. La glutamina es un potente nutriente para las células intestinales, lo que permite que el sistema digestivo se reactive de forma suave y sin estrés. Es la forma más inteligente de romper un ayuno prolongado. Otras opciones válidas son sopas ligeras de vegetales con un poco de grasa saludable (como aceite de coco o aguacate), o proteínas de fácil digestión como pescado al vapor o huevos.</li>
+                            </ol>
+                            
+                            <div class="consumo-info">
+                                <b>Consejo de un profesional</b><br>
+                                OMAD es una herramienta poderosa, pero no una solución mágica. Mi advertencia es clara: la nutrición es la clave. Si esa única comida está llena de azúcares y grasas trans, los beneficios serán mínimos o incluso contraproducentes. Utiliza este protocolo para potenciar una dieta ya saludable, no para compensar una mala alimentación.
+                            </div>
+                        </div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="consideraciones-ayuno" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>Consideraciones Importantes para una Transición Cetogénica Exitosa y Segura 🧠💊</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>Incursionar en una alimentación cetogénica es un cambio metabólico profundo, y como en cualquier viaje transformador, hay consideraciones clave que aseguran no solo el éxito, sino también la seguridad y la salud a largo plazo. Aquí te presento una visión experta de los puntos más críticos.</p>
+                        <h4 class="font-semibold text-white">Calidad sobre Cantidad: Tu Combustible de Alta Gama 🥑🥩</h4>
+                        <p>No todas las grasas y proteínas son iguales. La calidad de los alimentos es la piedra angular de una salud metabólica óptima. Las fuentes de alta calidad no solo te proporcionan los macronutrientes necesarios, sino también un perfil superior de micronutrientes y compuestos bioactivos.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Grasas:</b> Prioriza aceites prensados en frío como el de oliva virgen extra, que preservan sus propiedades antiinflamatorias. Incluye grasas de fuentes como aguacates, nueces y semillas. Evita los aceites vegetales altamente procesados, que a menudo contienen un exceso de ácidos grasos omega-6 pro-inflamatorios.</li>
+                            <li><b>Proteínas:</b> Opta por carnes de pastoreo, pescado salvaje y huevos de gallinas de libre pastoreo. Estas fuentes tienen un perfil de ácidos grasos más favorable (mayor proporción de Omega-3) y son más ricas en vitaminas y minerales esenciales. Una proteína de calidad no solo ayuda a mantener la saciedad, sino que también apoya la construcción y el mantenimiento de la masa muscular magra. La densidad nutricional de estos alimentos es crucial para la salud celular y la reducción de la inflamación crónica.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">Supervisión Profesional: Navegando la Transición con un Experto 🩺👨‍⚕️</h4>
+                        <p>Antes de iniciar cualquier cambio metabólico tan significativo, es fundamental consultar con un profesional de la salud actualizado en dietas bajas en carbohidratos. Esta precaución es especialmente crítica si tienes condiciones preexistentes.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Diabetes:</b> La dieta cetogénica reduce drásticamente los niveles de glucosa en sangre. Sin supervisión, esto podría provocar episodios peligrosos de hipoglucemia, si la medicación para la diabetes no se ajusta de manera oportuna.</li>
+                            <li><b>Problemas Renales o Hepáticos:</b> El metabolismo de una dieta alta en grasas y, en algunos casos, en proteínas, representa una carga metabólica distinta para estos órganos. Un profesional puede monitorear los marcadores clave y asegurar que la dieta sea segura para tu condición específica, evitando complicaciones a largo plazo.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">Revisa tus Medicamentos: Adaptándote a tu Nuevo Estado Metabólico 💊📈</h4>
+                        <p>A medida que tu cuerpo se adapta a la cetosis, experimentarás cambios profundos que impactan en la eficacia de ciertos medicamentos.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Medicamentos para la Hipertensión:</b> La dieta cetogénica es un diurético natural. Al excretar más sodio y agua, el volumen sanguíneo disminuye, lo que a menudo reduce la presión arterial. Continuar con la misma dosis de medicamentos para la hipertensión sin supervisión puede llevar a una hipotensión peligrosa.</li>
+                            <li><b>Medicamentos para la Diabetes:</b> Como la dieta cetogénica es una poderosa herramienta para el control glucémico, las dosis de insulina o de hipoglicemiantes orales necesitarán ser ajustados, a veces de forma inmediata, para evitar una caída drástica de azúcar en sangre. La supervisión médica es indispensable para este proceso.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">Más Allá de la Pérdida de Peso: Una Herramienta para la Salud Integral 🧠✨</h4>
+                        <p>La dieta cetogénica es mucho más que una simple estrategia para perder peso. Al entender y centrarte en sus beneficios metabólicos más amplios, es más probable que mantengas la adherencia a largo plazo y coseches recompensas significativas.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Salud Cerebral:</b> Los cuerpos cetónicos, especialmente el beta-hidroxibutirato (BHB), son un combustible superior para el cerebro, proporcionando una fuente de energía más limpia y eficiente que la glucosa. Esto a menudo se traduce en una notable claridad mental, mayor enfoque y potencial neuroprotector.</li>
+                            <li><b>Reducción de la Inflamación:</b> La cetosis tiene un poderoso efecto antiinflamatorio. A nivel molecular, los cuerpos cetónicos pueden inhibir el inflamasoma, la maquinaria celular que desencadena la inflamación. Además, el cambio en el perfil de ácidos grasos a favor de los antiinflamatorios (Omega-3) y la reducción de la inflamación sistémica por la baja de insulina son clave para combatir enfermedades crónicas.</li>
+                            <li><b>Energía Sostenida:</b> Al lograr la flexibilidad metabólica, tu cuerpo deja de depender de los carbohidratos para obtener energía. Esto significa que ya no experimentarás los altibajos de energía (subidas y caídas) asociados con los picos de glucosa, disfrutando de una energía constante y sostenida a lo largo del día.</li>
+                        </ul>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="beneficios-ayuno" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>🌟 Beneficios del Ayuno Intermitente</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <h4 class="font-semibold text-white">⚖️ Optimización de la Composición Corporal y Pérdida de Grasa:</h4><ul class="list-disc list-inside space-y-2">
+                            <li><b>Cambio Hormonal Favorable:</b> El ayuno reduce drásticamente los niveles de insulina y aumenta los de glucagón y norepinefrina. Esta combinación hormonal inhibe el almacenamiento de grasa (lipogénesis) y potencia la liberación y quema de la grasa almacenada (lipólisis).</li>
+                            <li><b>Acceso a Reservas de Grasa:</b> Con la insulina baja, el cuerpo puede acceder fácilmente a las reservas de grasa corporal para convertirlas en energía, un proceso que es ineficiente en un estado de alimentación constante.</li>
+                            <li><b>Regulación del Apetito:</b> El ayuno ayuda a regular las hormonas del hambre como la grelina (disminuye con el tiempo) y aumenta la sensibilidad a la leptina (hormona de la saciedad), lo que conduce a un mejor control del apetito y una reducción de la ingesta calórica espontánea.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">❤️ Reseteo y Mejora de la Salud Metabólica:</h4><ul class="list-disc list-inside space-y-2">
+                            <li><b>Aumento de la Sensibilidad a la Insulina:</b> Al darle al páncreas períodos de descanso, las células del cuerpo se vuelven mucho más sensibles a la insulina. Esto significa que se necesita menos insulina para gestionar la glucosa, lo que reduce el riesgo de resistencia a la insulina, el pilar del síndrome metabólico y la diabetes tipo 2.</li>
+                            <li><b>Control Glucémico Superior:</b> La reducción de la frecuencia de las comidas disminuye la carga glucémica general, lo que lleva a niveles de glucosa en sangre más bajos y estables, y a una mejora en el marcador a largo plazo HbA1c.</li>
+                            <li><b>Perfil Lipídico Optimizado:</b> El ayuno ha demostrado reducir los niveles de triglicéridos en sangre y puede influir en el cambio del perfil de las partículas de colesterol LDL de pequeñas y densas (más aterogénicas) a partículas más grandes y menos dañinas.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">🧠 Potenciación de la Salud Cerebral y Cognitiva:</h4><ul class="list-disc list-inside space-y-2">
+                            <li><b>Estímulo del BDNF:</b> El ayuno es un potente estímulo para la producción del Factor Neurotrófico Derivado del Cerebro (BDNF). Esta proteína es crucial para la supervivencia de las neuronas existentes, el crecimiento de nuevas neuronas (neurogénesis) y la formación de nuevas sinapsis, lo que es fundamental para el aprendizaje y la memoria.</li>
+                            <li><b>Combustible Cerebral Eficiente:</b> Los cuerpos cetónicos, cuya producción se potencia con el ayuno, son una fuente de energía "más limpia" para el cerebro en comparación con la glucosa, ya que generan menos estrés oxidativo y especies reactivas de oxígeno (ROS).</li>
+                            <li><b>Claridad Mental:</b> Muchos individuos reportan una mayor agudeza mental y concentración durante el ayuno, un efecto atribuido a la combinación de niveles estables de glucosa, el aumento de cetonas y la elevación de neurotransmisores como la norepinefrina.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">✨ Activación de Vías de Longevidad y Reparación Celular:</h4><ul class="list-disc list-inside space-y-2">
+                            <li><b>Autofagia ♻️:</b> El ayuno es el estímulo más potente conocido para la autofagia, el proceso de "reciclaje" celular. Durante la autofagia, las células descomponen y eliminan proteínas viejas, dañadas y disfuncionales, y orgánulos desgastados. Este proceso es fundamental para la renovación celular, la reducción del riesgo de enfermedades neurodegenerativas y el envejecimiento saludable.</li>
+                            <li><b>Reducción de la Inflamación Sistémica:</b> El ayuno ha demostrado reducir marcadores inflamatorios clave en el cuerpo, como la proteína C reactiva (PCR), la interleucina-6 y el TNF-alfa. La inflamación crónica está en la raíz de la mayoría de las enfermedades modernas.</li>
+                            <li><b>Apoptosis 🧬:</b> El ayuno también promueve la apoptosis, la muerte celular programada de células dañadas o precancerosas. Es un mecanismo de control de calidad esencial que el cuerpo utiliza para eliminar células que podrían convertirse en un problema, contribuyendo a la prevención de enfermedades.</li>
+                        </ul>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="suplementos" class="content-section hidden">
+                <h2 class="text-2xl font-bold text-white mb-4">💊 Suplementos Recomendados</h2>
+                <div class="space-y-4">
+                     <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>1. Vitamina D (Colecalciferol) y Calcio: El Dúo para la Salud Ósea ☀️🦴</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>La Vitamina D es una prohormona esteroidea con un viaje metabólico altamente regulado. Todo comienza en la piel, donde la radiación UVB (290-315 nm) convierte el 7-dehidrocolesterol en previtamina D3, que luego se isomeriza térmicamente para formar colecalciferol (Vitamina D3). Esta forma es transportada por la globulina fijadora de vitamina D (DBP) hacia el hígado, donde la enzima CYP2R1 la convierte en 25-hidroxivitamina D, el biomarcador que usamos para medir los niveles en sangre. La activación final ocurre en los riñones por la enzima 1-alfa-hidroxilasa (CYP27B1), que la transforma en calcitriol (1,25-dihidroxivitamina D), la hormona biológicamente activa.</p>
+                            <p>El calcitriol ejerce sus efectos uniéndose al Receptor de Vitamina D (VDR) en casi todas las células del cuerpo, modulando la expresión de más de 200 genes. Su función más crucial es en la homeostasis del calcio y el fósforo. El calcitriol actúa como una llave que facilita la absorción de calcio en el intestino delgado al inducir la producción de una proteína llamada calbindina. Esta proteína es esencial para transportar el calcio de la dieta a través de las células intestinales hacia el torrente sanguíneo. Sin niveles adecuados de Vitamina D, esta absorción es ineficiente, lo que obliga al cuerpo a extraer calcio de los huesos para mantener los niveles sanguíneos. Esta relación directa es fundamental para construir y mantener la densidad ósea, previniendo enfermedades como el raquitismo y la osteoporosis.</p>
+                            <p>Además de su rol en la salud ósea, el VDR se encuentra en células del páncreas, células inmunes y en el cerebro, explicando sus roles adicionales: actúa como un potente inmunomodulador (modulando la respuesta inflamatoria y la función de células como los macrófagos y las células T), en la regulación del sistema renina-angiotensina para el control de la presión arterial, y mejorando la sensibilidad a la insulina y el control de la glucosa.</p>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> Por su naturaleza liposoluble, debe consumirse con la comida más copiosa del día que contenga grasas saludables 🥑 (aguacate, aceite de oliva, frutos secos) para asegurar su transporte eficaz en quilomicrones. Para optimizar la síntesis natural de Vitamina D, es ideal obtener exposición solar en los horarios donde la intensidad UV es menor, como en las primeras horas de la mañana (entre 9:00 a.m. y 11:30 a.m.) o en las últimas horas de la tarde (entre las 5:00 p.m. y las 7:00 p.m.).</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>2. Omega-3 (EPA y DHA) 🐟</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                           <p>Los Omega-3 (EPA y DHA) son ácidos grasos poliinsaturados esenciales que actúan como precursores de mediadores lipídicos y como componentes estructurales de las membranas celulares. A nivel molecular, el EPA (Ácido Eicosapentaenoico) compite con el ácido araquidónico (Omega-6) por las enzimas ciclooxigenasa y lipooxigenasa, resultando en la producción de eicosanoides menos proinflamatorios. Además, el EPA y el DHA (Ácido Docosahexaenoico) son sustratos para la síntesis de mediadores lipídicos pro-resolución especializados (SPMs), como las resolvinas, protectinas y maresinas. Estas moléculas no solo detienen la inflamación, sino que promueven activamente su resolución, un proceso crucial para la salud cardiovascular y la prevención de enfermedades crónicas.</p>
+                           <p>El DHA es el ácido graso más abundante en las membranas del cerebro y la retina 🧠. Es vital para mantener la fluidez de la membrana celular y la estructura de los microdominios lipídicos (rafts), que son esenciales para la señalización celular y la función sináptica. Esto se traduce en una mejora en la neuroplasticidad, la memoria, la función cognitiva y el desarrollo neuronal.</p>
+                           <h4 class="font-semibold text-white">Diferencia entre Omega-3 del Mar y de las Plantas</h4>
+                           <p>El ALA (Ácido Alfa-Linolénico), el Omega-3 de las plantas, debe ser convertido en EPA y DHA por el cuerpo. Sin embargo, esta vía metabólica es extremadamente ineficiente, con una tasa de conversión a DHA inferior al 1% en la mayoría de los humanos. Por esta razón, el ALA no es un sustituto efectivo, y los Omega-3 marinos son la única fuente biodisponible.</p>
+                           <div class="consumo-info"><b>Guía de Consumo:</b> Por ser liposoluble, debe ser consumido con una comida que contenga grasa para una absorción óptima.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>3. Potasio (K+): El Guardián del Potencial de Membrana 🧂 </span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>El Potasio (K+) es el principal catión intracelular y el protagonista en la generación de los impulsos eléctricos del cuerpo. Su equilibrio con el sodio (Na+) es el pilar de la homeostasis celular, mediado por la bomba de sodio-potasio (Na+/K+-ATPasa). Esta proteína de membrana crucial utiliza la energía del ATP para bombear iones, estableciendo el potencial de membrana en reposo, que es la base de la excitabilidad celular. Este potencial es fundamental para:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Transmisión nerviosa:</b> Permite la propagación de los potenciales de acción, la señal eléctrica que viaja a lo largo de las neuronas.</li>
+                                <li><b>Contracción muscular:</b> Es indispensable para la contracción de todos los tipos de músculo, incluyendo el músculo cardíaco, lo que garantiza la regulación del ritmo cardíaco y la fuerza de contracción ❤️.</li>
+                                <li><b>Equilibrio de fluidos:</b> Contribuye a regular la presión osmótica y el volumen celular.</li>
+                                <li><b>Regulación de la presión arterial:</b> Al actuar como un vasodilatador, el potasio relaja las paredes de los vasos sanguíneos, contrarrestando los efectos hipertensivos del sodio y reduciendo la presión arterial.</li>
+                            </ul>
+                            <p>Además de su papel en la bioelectricidad, el potasio es un cofactor esencial para enzimas involucradas en el metabolismo de los carbohidratos (piruvato quinasa, por ejemplo) y la síntesis de proteínas, lo que le confiere un papel crucial en el crecimiento y reparación de los tejidos.</p>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> Se recomienda consumir el potasio con una comida, preferiblemente una rica en sodio, para que sus efectos reguladores se manifiesten de manera más eficiente y para evitar el malestar estomacal.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>4. Magnesio (Mg2+): El Regulador Maestro de la Bioenergética y el Sistema Nervioso 😴</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>El Magnesio (Mg2+) es un cofactor mineral indispensable en más de 300 reacciones enzimáticas, lo que lo convierte en un regulador maestro de la fisiología celular. Su papel más crítico es la estabilización de la molécula de ATP 🔋. El magnesio se une al ATP, formando el complejo Mg-ATP, que es la forma biológicamente activa que las enzimas pueden utilizar. Esto lo hace crucial para:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Producción de energía:</b> Participa en casi todas las etapas del metabolismo energético, incluyendo la glucólisis y la fosforilación oxidativa.</li>
+                                <li><b>Síntesis de macromoléculas:</b> Es necesario para la función de las polimerasas, enzimas que sintetizan ADN, ARN y proteínas.</li>
+                                <li><b>Neurología y relajación:</b> Actúa como un antagonista del receptor NMDA, un receptor de glutamato que, al ser hiperactivo, puede causar excitotoxicidad neuronal. Al bloquearlo, el magnesio reduce la excitabilidad. Complementariamente, potencia la acción del GABA, el principal neurotransmisor inhibidor del sistema nervioso central, promoviendo la relajación muscular y cerebral, lo que mejora la calidad del sueño.</li>
+                            </ul>
+                            <h4 class="font-semibold text-white">La Sinergia entre el Potasio y el Magnesio:</h4>
+                            <p>La relación entre el potasio y el magnesio es de dependencia funcional. El magnesio es un cofactor esencial para el correcto funcionamiento de la bomba de sodio-potasio (Na+/K+-ATPasa), la misma bomba que introduce el potasio en la célula. Sin niveles adecuados de magnesio, esta bomba se vuelve ineficiente, lo que puede llevar a una pérdida de potasio y, por ende, a una deficiencia secundaria. Cuando ambos minerales están en equilibrio, se asegura un óptimo potencial de membrana, esencial para la salud cardiovascular, nerviosa y muscular.</p>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> Si bien el consumo antes de dormir es ideal para aprovechar su efecto sedante, es igualmente beneficioso tomarlo después de la segunda comida del día para darle tiempo a actuar y potenciar la relajación a lo largo de la noche.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>5. NAD+ (Nicotinamida Adenina Dinucleótido): La Molécula Central de la Longevidad 🔋🧬</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>El NAD+ es la coenzima fundamental del metabolismo y un pilar de la longevidad. Su omnipresencia lo convierte en un pilar de la vida celular, desempeñando roles duales e interconectados en todas las formas de vida. A nivel molecular, el NAD+ existe en dos estados: el oxidado (NAD+) y el reducido (NADH), y su función principal reside en su papel como aceptor y donador de electrones en las reacciones redox (reducción-oxidación).</p>
+                            <h4 class="font-semibold text-white">La célula mantiene sus niveles de NAD+ a través de tres vías de síntesis principales:</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Vía De Novo:</b> Una ruta de biosíntesis que parte del aminoácido esencial triptófano. Es una vía de síntesis completa, pero energéticamente costosa y menos eficiente.</li>
+                                <li><b>Vía de Preiss-Handler:</b> Utiliza el ácido nicotínico (vitamina B3) como precursor.</li>
+                                <li><b>Vía de Rescate (Salvage Pathway):</b> Esta es la vía más crítica y eficiente en los mamíferos. Recicla subproductos del NAD+, como la nicotinamida (Nam) y la nicotinamida ribosida (NR), para regenerar NAD+ mediante la enzima clave NAMPT (nicotinamida phosphoribosyltransferase). La eficiencia de esta vía es esencial para mantener los niveles de NAD+ en el tiempo.</li>
+                            </ul>
+                            <p>El papel del NAD+ se extiende más allá del metabolismo energético. Es un sustrato indispensable para enzimas que modulan la salud celular y el envejecimiento:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Sirtuinas (SIRT1-SIRT7):</b> Estas deacetilasas dependen del NAD+ para su actividad. Por ejemplo, la SIRT1 utiliza NAD+ para eliminar grupos acetilo de las histonas (proteínas alrededor de las cuales se enrolla el ADN) y de factores de transcripción como el p53. Al hacerlo, regula la expresión génica, mejora la respuesta al estrés celular y participa en la reparación del ADN.</li>
+                                <li><b>PARPs (Poli-ADP-ribosa polimerasas):</b> Enzimas cruciales para la reparación del ADN. Utilizan NAD+ como sustrato para polimerizar ADP-ribosa, lo que facilita la reparación y previene la inestabilidad genómica.</li>
+                            </ul>
+                            <p>Los niveles de NAD+ disminuyen con la edad, un fenómeno que se considera un sello distintivo del envejecimiento. Esta disminución se debe principalmente a dos factores:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li>La actividad reducida de la enzima NAMPT en la vía de rescate.</li>
+                                <li>El aumento de la actividad de la enzima CD38, una NADasa que degrada activamente el NAD+. La actividad del CD38 aumenta con la inflamación crónica y el estrés oxidativo, creando un ciclo negativo que agota aún más las reservas de NAD+.</li>
+                            </ul>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> La suplementación con precursores de NAD+ (como la nicotinamida ribosida o el mononucleótido de nicotinamida) se recomienda por la mañana, en ayunas, para maximizar su absorción y alinearla con el ritmo circadiano.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>6. Glutatión: El Guardián de la Célula 💪🛡️</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>El Glutatión (GSH) es el "antioxidante maestro" del cuerpo, un tripéptido compuesto por los aminoácidos cisteína, glutamato y glicina. Su síntesis celular es un proceso de dos pasos que está intrínsecamente limitado por la disponibilidad de cisteína. Este proceso es catalizado por dos enzimas: primero, la glutamato-cisteína ligasa une el glutamato y la cisteína, y luego la glutatión sintetasa añade la glicina.</p>
+                            <p>El glutatión ejerce su función protectora principalmente a través de dos mecanismos cruciales:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Protección Antioxidante (Ciclo Redox):</b> Actúa como un agente reductor que neutraliza directamente las especies reactivas de oxígeno (ROS) al donar un electrón. En este proceso, el glutatión reducido (GSH) se oxida a glutatión disulfuro (GSSG). La enzima glutatión reductasa luego utiliza NADPH para reducir el GSSG de nuevo a GSH, en un ciclo que mantiene la capacidad antioxidante de la célula.</li>
+                                <li><b>Desintoxicación y Conjugación:</b> A través de la familia de enzimas Glutatión S-transferasa (GST), el glutatión se conjuga con xenobióticos (toxinas, carcinógenos, metabolitos de fármacos). Esta conjugación los hace más hidrosolubles y, por lo tanto, más fáciles de eliminar por los riñones o la bilis.</li>
+                            </ul>
+                            <p>Además de estos roles, el glutatión es vital para:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Protección Mitocondrial:</b> Mantiene el ambiente redox adecuado dentro de las mitocondrias, protegiéndolas del daño oxidativo y asegurando la eficiencia de la producción de energía.</li>
+                                <li><b>Regulación de la Apoptosis:</b> Su nivel es un factor clave en la decisión de la célula de iniciar la muerte celular programada.</li>
+                                <li><b>Función Inmunológica:</b> Es esencial para la proliferación de linfocitos y la función óptima de las células inmunitarias.</li>
+                            </ul>
+                            <p>La producción de glutatión disminuye con la edad y en condiciones de estrés oxidativo crónico, lo que lo convierte en un biomarcador de la salud metabólica.</p>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> La suplementación con glutatión puro tiene una biodisponibilidad limitada. Por ello, se sugiere la suplementación con sus precursores (principalmente N-acetilcisteína) o el consumo de alimentos ricos en cisteína. La ingesta se recomienda por la mañana, en ayunas, para evitar la competencia con otros aminoácidos en la absorción.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>7. Creatina: El Turbo de Energía Muscular 🏋️💥</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>La Creatina es una molécula que actúa como una reserva de energía de alta potencia y rápida disponibilidad, sintetizada de forma natural en el hígado y los riñones a partir de los aminoácidos arginina, glicina y metionina. La mayor parte se almacena en el músculo esquelético.</p>
+                            <p>Su función más crítica se centra en el sistema de fosfocreatina, la vía más rápida para regenerar ATP (la moneda de energía celular) durante esfuerzos de alta intensidad y corta duración (ejercicios anaeróbicos). En reposo, la creatina se fosforila a fosfocreatina (PCr) con la ayuda de la enzima creatina quinasa. Durante el ejercicio explosivo, la PCr dona su grupo fosfato al ADP para regenerar instantáneamente el ATP, permitiendo al músculo mantener la contracción máxima durante los primeros segundos sin depender del metabolismo oxidativo.</p>
+                            <p>Más allá de su función energética, la creatina tiene otras propiedades importantes:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Efecto Osmolítico:</b> La creatina atrae agua hacia el interior de las células musculares, un fenómeno conocido como hinchazón celular. Este aumento de volumen no solo mejora la hidratación muscular, sino que también actúa como una señal anabólica, estimulando la síntesis de proteínas y el crecimiento muscular.</li>
+                                <li><b>Amortiguador de pH:</b> Actúa como un tampón intracelular, ayudando a mitigar la acumulación de iones de hidrógeno durante el ejercicio intenso, lo que retrasa la fatiga muscular.</li>
+                                <li><b>Neuroprotección:</b> El cerebro, un órgano de alto consumo energético, también utiliza el sistema de fosfocreatina para mantener el suministro de ATP. Se ha demostrado que la suplementación con creatina puede tener un efecto neuroprotector, mejorando la bioenergética cerebral.</li>
+                            </ul>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> La consistencia en el consumo diario es más importante que el momento exacto. Un protocolo común incluye una fase de carga (dosis más altas por 5-7 días) seguida de una fase de mantenimiento. Sin embargo, se sugiere que consumirla después del entrenamiento 🏃 puede ser beneficioso, ya que la liberación de insulina post-ejercicio aumenta la expresión de los transportadores de creatina, facilitando su captación y almacenamiento en el músculo.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>8. Vitamina C (Ácido Ascórbico) 🍊</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>La Vitamina C es una vitamina hidrosoluble y un potente antioxidante. Su función más profunda es como cofactor enzimático, facilitando reacciones bioquímicas esenciales. Es indispensable para la actividad de las enzimas prolil hidroxilasa y lisil hidroxilasa, que catalizan la hidroxilación de los aminoácidos prolina y lisina durante la síntesis de colágeno. Esta hidroxilación es un paso crítico que le confiere al colágeno su estructura de triple hélice estable y resistente, fundamental para la integridad de la piel, los vasos sanguíneos, los huesos y el cartílago. Sin Vitamina C, la estructura del colágeno se desintegra, lo que se observa en el escorbuto.</p>
+                            <p>Más allá del colágeno, su rol como cofactor es crucial en:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>Síntesis de Carnitina:</b> La Vitamina C es un cofactor para las enzimas que producen carnitina, una molécula que transporta los ácidos grasos a las mitocondrias para la beta-oxidación (producción de energía).</li>
+                                <li><b>Síntesis de Neurotransmisores:</b> Es esencial en la producción de catecolaminas como la norepinefrina, a través de la enzima dopamina β-hidroxilasa.</li>
+                                <li><b>Absorción de Hierro:</b> Actúa como agente reductor, convirtiendo el hierro férrico (Fe3+) a hierro ferroso (Fe2+), una forma más soluble y fácilmente absorbible por el intestino, potenciando la biodisponibilidad del hierro no hemo (el que se encuentra en alimentos de origen vegetal).</li>
+                            </ul>
+                            <p>Como antioxidante, la Vitamina C neutraliza las especies reactivas de oxígeno (ROS) al donar un electrón. También participa en el ciclo de regeneración de otros antioxidantes, como la Vitamina E, fortaleciendo la defensa de las membranas celulares contra el daño oxidativo. Al ser hidrosoluble, el cuerpo no la almacena en grandes cantidades, y el exceso se excreta, por lo que una ingesta consistente y moderada es más efectiva que dosis masivas esporádicas.</p>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> Se recomienda consumir la vitamina C con las comidas para evitar la irritación estomacal que puede causar, especialmente si se consume en ayunas. Al consumirla con alimentos, también facilita la absorción de hierro presente en ellos.</div>
+                        </div></div>
+                    </div>
+                    <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                        <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>La Red de Interacciones entre los Suplementos: Una Visión Holística 🌐</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                        <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                            <p>La verdadera potencia de estos suplementos no reside en su acción individual, sino en cómo se entrelazan para optimizar los sistemas vitales del cuerpo. No actúan de forma aislada, sino que forman una red bioquímica y fisiológica.</p>
+                            <h4 class="font-semibold text-white">Eje de la Energía y la Longevidad:</h4>
+                            <p>El NAD+ es la coenzima central del metabolismo energético. Su función es inextricable de la del magnesio, que actúa como cofactor para el ATP. La creatina complementa este sistema con su reserva de energía de acción rápida. A su vez, la vitamina D optimiza el uso de la energía al mejorar la sensibilidad a la insulina.</p>
+                            <h4 class="font-semibold text-white">Eje Antiinflamatorio e Inmunomodulador:</h4>
+                            <p>La vitamina D modula la respuesta inmune a nivel genómico, actuando como un freno para la inflamación. Los Omega-3 son los precursores de mediadores que resuelven activamente la inflamación. El glutatión, el antioxidante maestro, neutraliza el estrés oxidativo que es la causa subyacente de la inflamación crónica. Juntos, crean un escudo protector que mantiene el sistema inmune en equilibrio.</p>
+                            <h4 class="font-semibold text-white">Eje de la Integridad Estructural y la Protección Celular:</h4>
+                            <p>La vitamina C es esencial para la síntesis de colágeno, la base de nuestros tejidos. El glutatión protege el ADN y las mitocondrias del daño oxidativo, garantizando la integridad a nivel molecular. Los Omega-3, al formar parte de las membranas celulares, aseguran su fluidez y funcionalidad.</p>
+                            <h4 class="font-semibold text-white">Eje Neuro-muscular y de la Hidratación:</h4>
+                            <p>La sinergia entre el potasio y el magnesio es clave para la excitabilidad celular, la transmisión nerviosa y la contracción muscular. La creatina, con su efecto osmolítico, atrae agua a las células musculares, un proceso que también depende del correcto equilibrio de estos electrolitos.</p>
+                            <p>Entender estas interacciones te permite ver que la suplementación es un acto de optimización sistémica, no la simple ingesta de piezas aisladas. Mejorar un componente a menudo tiene efectos beneficiosos en toda la red, lo cual es el principio fundamental de la salud metabólica.</p>
+                        </div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="hidratacion" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>El Equilibrio de Electrolitos en la Dieta Cetogénica: La Clave para Vencer la "Gripe Keto" ⚡️💧</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>Al iniciar una dieta cetogénica, el cuerpo experimenta una transición metabólica profunda. Uno de los cambios más inmediatos es el agotamiento de las reservas de glucógeno y la consecuente reducción drástica en los niveles de insulina. Este cambio, aunque fundamental para la cetosis, desencadena un fenómeno fisiológico crucial conocido como diuresis cetogénica. A diferencia de una diuresis común, esta es inducida por la reducción de la insulina, que actúa como una señal para que los riñones dejen de retener sodio.</p>
+                        <p>La excreción de sodio, un proceso llamado natriuresis, tiene un efecto de arrastre sobre el agua. El agua extracelular sigue al sodio para mantener el equilibrio osmótico, lo que resulta en una rápida y significativa pérdida de líquidos. Este es el principal mecanismo por el cual muchos experimentan una rápida pérdida de peso en los primeros días. Sin embargo, esta pérdida de sodio y agua también arrastra consigo otros electrolitos vitales, en particular el potasio y el magnesio, sentando las bases de los síntomas de la "gripe keto" (fatiga, calambres musculares y mareos).</p>
+                        <h4 class="font-semibold text-white">El Rol Vital de Cada Electrolito 🧬</h4>
+                        <p>Para comprender la importancia de reponer estos minerales, es esencial profundizar en sus funciones a nivel celular:</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Sodio (Na+): El Guardián del Volumen Celular</b><br>El sodio es el principal catión extracelular. Su concentración es fundamental para mantener el volumen del plasma sanguíneo y la presión arterial. Además, el sodio es indispensable para la generación de los potenciales de acción en las células nerviosas y musculares. Una deficiencia de sodio puede provocar una disminución del volumen sanguíneo, llevando a la hipotensión postural y a la reducción de la función nerviosa, lo que se manifiesta como mareos y letargo.</li>
+                            <li><b>Potasio (K+): El Motor del Potencial de Membrana</b><br>El potasio es el principal catión intracelular. Su concentración es rigurosamente mantenida por la bomba de sodio-potasio (Na+/K+-ATPasa), un proceso que consume energía para bombear el potasio hacia el interior de la célula. Este desequilibrio electroquímico es la base del potencial de membrana en reposo, que es crítico para la excitabilidad celular. Una pérdida de potasio puede comprometer la contracción muscular, la función cardíaca y la transmisión nerviosa.</li>
+                            <li><b>Magnesio (Mg2+): El Cofactor Maestro de la Bioenergética y la Relajación</b><br>El magnesio es un cofactor mineral indispensable en más de 300 reacciones enzimáticas. Su función más crucial es la de estabilizar la molécula de ATP, la moneda energética celular, permitiendo que las enzimas la utilicen para la producción de energía. A nivel neurológico, actúa como un antagonista natural de los receptores NMDA (reduciendo la excitabilidad neuronal) y potencia los receptores GABA (promoviendo la relajación). La pérdida de magnesio contribuye directamente a los calambres musculares, la ansiedad y las dificultades para dormir. Es vital para la correcta función de la bomba Na+/K+-ATPasa, lo que significa que una deficiencia de magnesio puede exacerbar una deficiencia de potasio.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">Guía de Reemplazo: Estrategias de Reposición Inteligente 💪</h4>
+                        <p>Para mitigar los síntomas y optimizar la adaptación a la cetosis, es imperativo reponer estos electrolitos de manera estratégica.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Sodio:</b> La forma más simple es añadir sal de buena calidad a los alimentos y beber caldos de hueso. Se recomienda una ingesta de 3 a 5 gramos de sodio al día.</li>
+                            <li><b>Potasio: El Poder del Citrato</b><br>Si bien los alimentos como el aguacate y los vegetales de hoja verde son excelentes fuentes, la suplementación con citrato de potasio es particularmente beneficiosa. El citrato es una molécula que, una vez absorbida, se metaboliza a bicarbonato, un agente alcalinizante que neutraliza los ácidos. Esto es crucial en la dieta cetogénica, donde la producción de cuerpos cetónicos puede acidificar ligeramente la orina, aumentando el riesgo de formación de cálculos renales. Al alcalinizar la orina, el citrato de potasio ayuda a prevenir este riesgo y mejora la absorción de otros minerales, lo que lo convierte en una elección superior.</li>
+                            <li><b>Magnesio: Calidad y Biodisponibilidad</b><br>Las mejores fuentes alimentarias de magnesio incluyen semillas, frutos secos y vegetales verdes. Sin embargo, para la suplementación, el citrato de magnesio es una de las formas más biodisponibles. Consumirlo después de una comida (o antes de dormir) es una estrategia inteligente para optimizar sus efectos relajantes.</li>
+                        </ul>
+                        <h4 class="font-semibold text-white">Resumen Funcional</h4>
+                        <p>La pérdida de electrolitos al inicio de la dieta cetogénica es una consecuencia directa de los cambios hormonales. Reponerlos, especialmente a través de formas biodisponibles como el citrato de potasio, es una medida indispensable para mantener el equilibrio hídrico, la función nerviosa y muscular, y asegurar una transición suave y exitosa hacia el estado de cetosis.</p>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="keto-mejora-salud" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>❤️ Cómo Keto Puede Mejorar la Salud</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>Como especialista con un doctorado en metabolismo, he revisado el texto y lo he expandido para ofrecer una comprensión más profunda de los mecanismos biológicos por los cuales la alimentación cetogénica puede ser una herramienta terapéutica efectiva.</p>
+                        <h4 class="font-semibold text-white">📉 Resistencia a la Insulina y Diabetes Tipo 2</h4>
+                        <p>La resistencia a la insulina es la piedra angular de la mayoría de las enfermedades metabólicas, incluyendo la diabetes tipo 2. En una dieta alta en carbohidratos, la ingesta constante de glucosa mantiene los niveles de insulina elevados, lo que obliga a las células a insensibilizarse a su señal con el tiempo.</p>
+                        <p>La alimentación cetogénica ataca directamente la causa raíz. Al reducir drásticamente el consumo de carbohidratos, se minimiza la liberación de glucosa en el torrente sanguíneo, lo que a su vez mantiene los niveles de insulina consistentemente bajos. Este estado permite que los receptores de insulina de las células se "descansen" y recuperen su sensibilidad. Como resultado, el cuerpo utiliza la insulina de manera mucho más eficiente. Esto no solo mejora el control glucémico, sino que puede llevar a una remisión de la diabetes tipo 2 en muchos casos, a menudo con una reducción significativa en la necesidad de medicación.</p>
+                        <h4 class="font-semibold text-white">🩺 Hígado Graso no Alcohólico (NAFLD)</h4>
+                        <p>El Hígado Graso no Alcohólico (NAFLD) o esteatosis hepática es una condición en la que se acumula un exceso de grasa en las células hepáticas. Este proceso es principalmente impulsado por el consumo excesivo de carbohidratos, que el hígado convierte en grasa a través de un proceso llamado lipogénesis de novo (DNL).</p>
+                        <p>La alimentación cetogénica es una intervención poderosa para el hígado graso porque actúa en dos frentes. Primero, elimina el sustrato principal (el exceso de carbohidratos) que alimenta la DNL, deteniendo la acumulación de nueva grasa. Segundo, al inducir la cetosis, el cuerpo comienza a utilizar la grasa como su principal fuente de energía. El hígado, que es central en este proceso, moviliza y quema la grasa acumulada, incluyendo la grasa intrahepática. La combinación de estos dos mecanismos puede llevar a una reversión notable del hígado graso y una mejora significativa en la función hepática.</p>
+                        <h4 class="font-semibold text-white">🦋 Hipotiroidismo</h4>
+                        <p>Si bien la alimentación cetogénica no es un tratamiento directo para el hipotiroidismo, su impacto indirecto en la salud metabólica puede ser profundamente beneficioso. Muchas formas de hipotiroidismo, como la tiroiditis de Hashimoto, tienen un componente autoinmune y de inflamación sistémica.</p>
+                        <p>Una dieta cetogénica es intrínsecamente antiinflamatoria, ya que elimina alimentos procesados, azúcares y otros pro-inflamatorios. Al reducir la inflamación, puede aliviar los síntomas y mejorar el bienestar en personas con hipotiroidismo. Además, muchos individuos con esta condición experimentan problemas de metabolismo de la glucosa, lo que contribuye a la fatiga y la "niebla mental". Al estabilizar los niveles de glucosa e insulina, la cetosis proporciona una fuente de energía cerebral más estable (los cuerpos cetónicos), lo que a menudo se traduce en una mejora de la energía y la claridad mental. Es crucial enfatizar que esta dieta debe ser monitoreada y ajustada en colaboración con un profesional de la salud.</p>
+                        <h4 class="font-semibold text-white">⚖️ Sobrepeso y Obesidad</h4>
+                        <p>El sobrepeso y la obesidad son, en gran medida, el resultado de una disfunción metabólica donde el cuerpo se vuelve ineficiente para utilizar la grasa almacenada. La alimentación cetogénica es una herramienta extraordinariamente efectiva para la pérdida de peso sostenible porque recalibra el metabolismo.</p>
+                        <p>Al inducir un estado de cetosis, el cuerpo pasa de quemar glucosa como su combustible principal a quemar grasa. Los cuerpos cetónicos (como el beta-hidroxibutirato) no solo sirven como una fuente de energía muy eficiente, sino que también tienen un potente efecto supresor del apetito. La combinación de una mayor quema de grasa y una reducción natural del hambre permite una ingesta calórica menor sin la sensación de privación. Además, la dieta mejora la flexibilidad metabólica, enseñándole al cuerpo a usar tanto glucosa como grasa de manera eficiente, lo que es la base para mantener el peso a largo plazo.</p>
+                        <h4 class="font-semibold text-white">💓 Hipertensión Arterial y Síndrome Metabólico</h4>
+                        <p>El Síndrome Metabólico es un cúmulo de condiciones (hipertensión, hiperglucemia, exceso de grasa abdominal, triglicéridos elevados y bajo HDL) que aumentan el riesgo de enfermedades cardíacas, accidentes cerebrovasculares y diabetes. Es un estado de disfunción metabólica profunda.</p>
+                        <p>La alimentación cetogénica impacta positivamente en cada uno de estos indicadores. La reducción de la ingesta de carbohidratos reduce los niveles de glucosa e insulina, lo que a su vez disminuye la presión arterial al promover la excreción de sodio y agua (natriuresis) y mejorar la función vascular. Además, el perfil lipídico se transforma favorablemente: los triglicéridos caen drásticamente, y el colesterol HDL ("colesterol bueno") tiende a aumentar. Estos cambios, junto con la reducción de la inflamación sistémica, son marcadores directos de una mejora de la salud metabólica que reduce el riesgo cardiovascular y puede revertir los síntomas del síndrome metabólico.</p>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="importancia-comidas" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>La Frecuencia de Comidas y la Flexibilidad Metabólica: Optimizando la Quema de Grasa y la Salud 💪</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>Desde una perspectiva metabólica, la frecuencia y composición de nuestras comidas son señales directas para nuestro cuerpo, afectando poderosamente el control de hormonas clave como la insulina. En el contexto de una alimentación cetogénica, optimizar este patrón de ingesta es crucial para maximizar los beneficios de la cetosis.</p>
+                        <h4 class="font-semibold text-white">🍽️ El Impacto de la Insulina y la Frecuencia de Comidas</h4>
+                        <p>La insulina es una hormona anabólica (de almacenamiento) que se libera en respuesta a la glucosa de los carbohidratos. Mientras los niveles de insulina son altos, el cuerpo está en modo de almacenamiento y tiene inhibida la capacidad de acceder a las reservas de grasa para obtener energía, un proceso conocido como lipólisis.</p>
+                        <p>Limitarse a comer tres veces al día ⏰ (o incluso menos), y espaciando adecuadamente las comidas, le da a tu cuerpo el tiempo que necesita para que los niveles de insulina bajen entre una comida y otra. Cuando la insulina está baja, el cuerpo recibe la señal para cambiar de un metabolismo basado en la glucosa a uno que utiliza la grasa almacenada. Este patrón no solo facilita el mantenimiento de la cetosis, sino que también promueve la flexibilidad metabólica, es decir, la capacidad del cuerpo para alternar eficientemente entre la quema de glucosa y grasa como combustible.</p>
+                        <h4 class="font-semibold text-white">🥗 La Importancia de una Comida Completa</h4>
+                        <p>El concepto de "tres comidas al día" solo es metabólicamente efectivo si las comidas están bien compuestas. Un "plato de comida" debe ser rico en grasas saludables y proteínas, con un mínimo de carbohidratos. A diferencia de un simple sándwich o un refrigerio ligero, que suelen ser ricos en carbohidratos y pobres en nutrientes, una comida completa proporciona una saciedad profunda. Las grasas y las proteínas son macronutrientes altamente saciantes que ralentizan el vaciamiento gástrico y regulan las hormonas del hambre, como la grelina, lo que te permite permanecer satisfecho por períodos más largos y evitar el deseo de picar entre horas.</p>
+                        <h4 class="font-semibold text-white">⏳ Ayuno Intermitente: Potenciando la Cetosis</h4>
+                        <p>Saltarse comidas o, más formalmente, practicar el ayuno intermitente, no solo es una herramienta para controlar el apetito, sino que es una estrategia poderosa para optimizar los beneficios de la cetosis. Al prolongar el período de ayuno (por ejemplo, de 14 a 16 horas al día), se maximiza el tiempo en el que los niveles de insulina son bajos. Esto acelera el proceso de quema de grasa y la producción de cuerpos cetónicos.</p>
+                        <p>Además de promover la pérdida de grasa, el ayuno intermitente también desencadena la autofagia, un proceso celular de limpieza y reciclaje que es vital para la salud celular, la reparación de tejidos y la longevidad. Al combinar el ayuno con una alimentación cetogénica, el control del apetito se vuelve más intuitivo, ya que el cuerpo se adapta a usar su propia grasa como fuente de energía constante, eliminando los picos y caídas de azúcar en sangre que causan los antojos.</p>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="consejos-reducir-comidas" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>📉 Consejos para reducir la frecuencia de comidas</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>En una dieta cetogénica, el hambre no debe ser una batalla constante. Al contrario, la cetosis te brinda la oportunidad de recalibrar tus señales de hambre y saciedad. Aquí te explicamos, con base en la ciencia del metabolismo, cómo optimizar tu alimentación para sentirte pleno y con energía.</p>
+                        <h4 class="font-semibold text-white">1. Aumenta el Tamaño de tus Porciones: El Poder del Volumen Gástrico y la Saciedad 🧠</h4>
+                        <p>En lugar de caer en el ciclo de comer pequeñas porciones varias veces al día, que mantienen la insulina fluctuando, opta por 2-3 comidas completas y abundantes. Al consumir una porción de mayor volumen, activas de manera más potente los receptores de estiramiento en tu estómago. Estos receptores envían una señal directa al cerebro, indicándole que has comido suficiente.</p>
+                        <p>Este mecanismo de saciedad no solo te mantiene lleno físicamente, sino que también permite que los niveles de insulina se estabilicen y caigan entre comidas. Este período de insulina baja es el estado ideal para que tu cuerpo cambie su metabolismo y acceda a tus reservas de grasa como fuente de energía.</p>
+                        <h4 class="font-semibold text-white">2. Prioriza las Grasas Saludables: La Señal Hormonal de la Plenitud 🥑</h4>
+                        <p>Las grasas no son solo una fuente de energía, sino poderosos agentes de saciedad. Tienen una densidad calórica más alta y, lo que es más importante, ralentizan el vaciamiento gástrico. Esto significa que los alimentos permanecen en tu estómago por más tiempo, enviando señales prolongadas de saciedad al cerebro.</p>
+                        <p>Además, las grasas saludables no elevan la insulina. Al mantener baja la insulina, evitas la montaña rusa de azúcar en sangre que causa antojos y hambre repentina. Incluir fuentes como el aceite de oliva extra virgen, aguacate, frutos secos y semillas en cada comida asegura una energía sostenida y una regulación hormonal óptima para controlar el apetito.</p>
+                        <h4 class="font-semibold text-white">3. Asegura una Buena Cantidad de Proteínas: El Efecto Termogénico y Hormonal 🥩</h4>
+                        <p>Las proteínas son el macronutriente con el mayor efecto termogénico. Esto significa que tu cuerpo gasta más energía para digerirlas y metabolizarlas que con cualquier otro nutriente. Este "costo" metabólico contribuye a la saciedad y al gasto calórico.</p>
+                        <p>Además, el consumo de proteínas estimula la liberación de hormonas de la saciedad, como el péptido YY (PYY) y el péptido similar al glucagón-1 (GLP-1), que actúan directamente en el cerebro para reducir el hambre. Incorporar fuentes de alta calidad como carnes, pescados, huevos y frutos secos no solo te mantendrá satisfecho, sino que también es crucial para preservar la masa muscular durante la pérdida de peso.</p>
+                        <h4 class="font-semibold text-white">4. Come Alimentos Fibrosos: El Nutriente que Alimenta a tu Microbiota 🥦</h4>
+                        <p>Las verduras bajas en carbohidratos no son solo para añadir volumen. La fibra soluble que contienen, como la de las espinacas, el brócoli y la coliflor, se disuelve en agua para formar un gel en el estómago. Esto aumenta aún más el volumen del contenido gástrico, lo que prolonga la sensación de plenitud.</p>
+                        <p>Aún más fascinante es el papel de la fibra en la salud intestinal. La fibra fermentable alimenta a tu microbiota intestinal, las bacterias beneficiosas en tu intestino. Estas bacterias, a su vez, producen ácidos grasos de cadena corta (AGCC), como el butirato, que no solo son una fuente de energía para las células del colon, sino que también tienen un papel crucial en la regulación del apetito y la salud metabólica.</p>
+                        <h4 class="font-semibold text-white">5. Bebe Suficiente Agua: La Sinergia entre la Hidratación y el Hambre 💧</h4>
+                        <p>La deshidratación puede confundirse fácilmente con el hambre. El cerebro, en su esfuerzo por regular ambos estados, a menudo activa la señal de hambre cuando en realidad necesita agua. Una estrategia sencilla pero muy efectiva es beber un vaso de agua antes de cada comida. Esto no solo promueve la hidratación celular, que es fundamental para todas las funciones metabólicas, sino que también ocupa espacio en el estómago, ayudando a reducir la cantidad de comida que necesitas para sentirte lleno.</p>
+                        <h4 class="font-semibold text-white">6. Introduce el Ayuno Intermitente: Recalibrando tus Hormonas del Hambre ⏰</h4>
+                        <p>El ayuno intermitente no es una dieta, sino un patrón de alimentación que potencia los beneficios de la cetosis. Al prolongar el período entre comidas, permites que los niveles de insulina caigan a su punto más bajo, activando la quema de grasa y la producción de cuerpos cetónicos de manera más eficiente. Con el tiempo, esta práctica reduce la dependencia de la comida y enseña a tu cuerpo a confiar en la grasa almacenada como una fuente de energía constante, lo que se traduce en un control del apetito más intuitivo y natural.</p>
+                        <h4 class="font-semibold text-white">7. Escucha a tu Cuerpo: La Consciencia Metabólica 🧘‍♀️</h4>
+                        <p>La clave definitiva es reconectar con las señales de tu cuerpo. Distingue entre el hambre fisiológica (un proceso lento que se desarrolla a lo largo del tiempo) y el hambre emocional o por aburrimiento (un deseo repentino de comer, a menudo impulsado por el hábito o el estado de ánimo). Al centrarte en comidas nutritivas y espaciadas, puedes reentrenar a tus hormonas (leptina, grelina, PYY) para que funcionen correctamente, haciendo que te sea fácil escuchar y responder a las verdaderas necesidades de tu cuerpo.</p>
+                    </div></div>
+                </div>
+            </section>
+            
+            <section id="beneficios-reducir-comidas" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>Beneficios de Reducir la Frecuencia de Comidas: Recalibrando tu Metabolismo a Nivel Molecular ⏰📉</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>Limitar la ventana de tiempo en la que comes no es una simple técnica de restricción calórica; es una poderosa intervención metabólica que optimiza los sistemas hormonales y enzimáticos de tu cuerpo para la quema de grasa. Es una recalibración celular que va más allá de la pérdida de peso.</p>
+                        <h4 class="font-semibold text-white">1. Mayor Pérdida de Peso: El Interruptor Enzimático de la Quema de Grasa 🔥🔬</h4>
+                        <p>Al reducir la frecuencia de comidas, mantienes los niveles de insulina en un estado basal bajo de forma prolongada. Este estado no solo detiene el almacenamiento de grasa, sino que también activa el "interruptor" molecular para la quema de grasa. La insulina, cuando está elevada, inhibe la enzima clave lipasa sensible a hormonas (HSL), responsable de descomponer los triglicéridos almacenados en las células grasas.</p>
+                        <p>Al mantener la insulina baja, se levanta esta inhibición, y la HSL se vuelve activa. Esto permite que los triglicéridos se descompongan en ácidos grasos libres y glicerol, que son liberados en el torrente sanguíneo para ser utilizados como combustible. Este proceso, conocido como lipólisis, es la razón por la cual el cuerpo se vuelve extremadamente eficiente en acceder y quemar sus propias reservas de grasa. Este mecanismo no solo conduce a la pérdida de peso, sino que también promueve la flexibilidad metabólica, es decir, la capacidad de tu cuerpo para alternar eficientemente entre la quema de glucosa y grasa.</p>
+                        <h4 class="font-semibold text-white">2. Aumento de la Cetosis: Optimizando la Maquinaria de Producción de Cetonas 🧠⚡️</h4>
+                        <p>Aunque una comida cetogénica no eleva la glucosa, siempre provoca una pequeña y transitoria respuesta de la insulina. Esta pequeña liberación, aunque no significativa, es suficiente para modular la producción de cetonas.</p>
+                        <p>Al reducir el número de comidas, minimizas la frecuencia de estos picos de insulina, permitiendo que el hígado mantenga una actividad constante de las enzimas clave para la cetogénesis, como la HMG-CoA sintasa. La síntesis de cuerpos cetónicos es inversamente proporcional a los niveles de insulina; por lo tanto, una insulina baja y sostenida favorece una producción robusta y estable de cetonas. Esto resulta en un estado de cetosis nutricional más profundo, con mayores niveles de cuerpos cetónicos circulantes. Estos no solo son un combustible superior para el cerebro, sino que el beta-hidroxibutirato (BHB) tiene efectos epigenéticos, regulando la expresión de genes relacionados con la longevidad y la inflamación.</p>
+                        <h4 class="font-semibold text-white">3. Mejor Control del Apetito: La Sinfonía Hormonal de la Saciedad 😋🧘</h4>
+                        <p>Comer constantemente, incluso snacks cetogénicos, puede desregular la delicada sinfonía de hormonas que controlan el hambre. Al espaciar tus comidas, le das a tu cuerpo la oportunidad de restablecer y optimizar las señales hormonales.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Grelina:</b> La "hormona del hambre", producida en el estómago, se eleva antes de las comidas para promover el apetito. Con patrones de alimentación regulares y menos frecuentes, las subidas de grelina se vuelven predecibles y más fáciles de manejar.</li>
+                            <li><b>Colecistoquinina (CCK) y Péptido YY (PYY):</b> Estas son hormonas de la saciedad liberadas por el intestino en respuesta a la presencia de grasa y proteínas. Al consumir comidas más grandes y ricas en estos macronutrientes, se estimula una liberación más potente y prolongada de estas hormonas, enviando una señal fuerte de plenitud al cerebro.</li>
+                            <li><b>Leptina:</b> La "hormona de la saciedad" a largo plazo, producida por las células grasas, se vuelve más efectiva. A medida que accedes a la grasa almacenada, la sensibilidad a la leptina mejora, lo que reduce los antojos y el impulso de comer constantemente.</li>
+                        </ul>
+                        <p>En resumen, la reducción de la frecuencia de comidas recalibra tu sistema hormonal para que el control del apetito no sea una batalla de fuerza de voluntad, sino una consecuencia natural de una fisiología optimizada.</p>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="tips-cetosis" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>⚡ Tips para Entrar en Cetosis Rápido</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>La alimentación cetogénica no es solo una dieta; es una profunda recalibración de tu metabolismo. Comprender los mecanismos detrás de sus principios fundamentales es la clave para dominar esta transformación.</p>
+                        <h4 class="font-semibold text-white">1. Restricción Severa de Carbohidratos: El Gran Desvío Metabólico 🔄</h4>
+                        <p><b>Por qué:</b> El cuerpo humano, por defecto, utiliza la glucosa proveniente de los carbohidratos como su principal fuente de energía. Al restringir severamente esta ingesta, se produce un cambio hormonal crucial. Los niveles de insulina caen drásticamente, mientras que la hormona glucagón aumenta. Esta nueva señal hormonal le indica a tu hígado que debe dejar de producir glucosa y, en su lugar, comenzar a convertir la grasa en cuerpos cetónicos (principalmente beta-hidroxibutirato). Es una sofisticada adaptación evolutiva para sobrevivir en ausencia de alimentos, pero ahora la utilizamos para reprogramar nuestra fisiología. Las cetonas se convierten en un "combustible alternativo" excepcionalmente eficiente para el cerebro y el cuerpo, lo cual es el objetivo principal de la cetosis.</p>
+                        <h4 class="font-semibold text-white">2. Aumenta la Ingesta de Grasas Saludables: El Combustible Estructural y Hormonal 🥑</h4>
+                        <p><b>Por qué:</b> En el estado de cetosis, la grasa se convierte en el combustible rey. Aumentar su consumo no solo proporciona la energía necesaria, sino que también garantiza la materia prima para la cetogénesis. Más importante aún, las grasas saludables, al carecer de un efecto significativo sobre la insulina, te permiten mantener el estado de cetosis. Las grasas saludables, como las que se encuentran en el aguacate, el aceite de oliva y los frutos secos, ralentizan el vaciamiento gástrico y promueven la liberación de hormonas de saciedad, como la colecistoquinina (CCK), lo que resulta en una sensación de plenitud duradera.</p>
+                        <h4 class="font-semibold text-white">3. Electrolitos: La Sintonía Fina del Equilibrio Celular 🧂🔋</h4>
+                        <p><b>Por qué:</b> La transición a la cetosis desencadena un fenómeno llamado diuresis cetogénica. El bajo nivel de insulina reduce la retención de sodio y agua en los riñones, lo que resulta en la excreción de grandes cantidades de líquidos. Este arrastre de agua arrastra consigo electrolitos vitales: sodio, potasio y magnesio. La reposición es crucial para la función celular. El potasio y el sodio son esenciales para la bomba de sodio-potasio (Na+/K+-ATPasa) que genera el potencial de membrana, fundamental para la transmisión nerviosa y la contracción muscular. El magnesio, por su parte, es un cofactor indispensable para más de 300 enzimas, incluyendo aquellas que producen energía y regulan el sueño. La reposición previene síntomas como calambres, fatiga y migrañas.</p>
+                        <h4 class="font-semibold text-white">4. Suplementos: Optimizando el Proceso Metabólico 💊🚀</h4>
+                        <p><b>Por qué:</b> Algunos suplementos actúan como catalizadores para facilitar la transición y potenciar los beneficios de la cetosis. El aceite MCT (triglicéridos de cadena media) es un ejemplo estelar. A diferencia de otras grasas, se absorbe rápidamente y se transporta directamente al hígado, donde se convierte en cetonas de forma casi instantánea, proporcionando una fuente de energía rápida para el cerebro. Suplementos como los cuerpos cetónicos exógenos pueden elevar los niveles de cetonas en la sangre de manera inmediata, lo que ayuda a reducir los síntomas de la "gripe keto" y mejora el rendimiento cognitivo y físico durante la transición.</p>
+                        <h4 class="font-semibold text-white">5. Hidratación: La Base de Toda Función Metabólica 💧</h4>
+                        <p><b>Por qué:</b> La diuresis cetogénica de las primeras etapas de la dieta aumenta significativamente las necesidades de hidratación. El agua no es solo un líquido; es el solvente en el que ocurren todas las reacciones enzimáticas y el medio de transporte para los nutrientes y los desechos. Mantenerse hidratado es vital para el funcionamiento óptimo de los riñones, que son los que están procesando más electrolitos y cuerpos cetónicos. La hidratación adecuada, junto con la reposición de electrolitos, es la primera línea de defensa para prevenir el letargo y la fatiga.</p>
+                        <h4 class="font-semibold text-white">6. Sueño: La Recarga Hormonal y Celular 😴</h4>
+                        <p><b>Por qué:</b> El sueño no es un estado pasivo, sino un período de intensa actividad de reparación. Es durante el sueño profundo que el cuerpo libera hormona del crecimiento (GH), vital para la reparación de tejidos. La falta de sueño crónico interrumpe este ciclo hormonal, aumentando los niveles de cortisol (la hormona del estrés) y desregulando la insulina. Un metabolismo que funciona mal por falta de sueño se vuelve menos eficiente en la quema de grasa y más propenso a almacenar grasa abdominal, sin importar lo estricto que seas con la dieta.</p>
+                        <h4 class="font-semibold text-white">7. Manejo del Estrés: El Impacto de Cortisol en la Cetosis 🧘‍♂️</h4>
+                        <p><b>Por qué:</b> El estrés crónico y los niveles elevados de cortisol son enemigos de la cetosis. El cortisol es una hormona del estrés que, a largo plazo, promueve la gluconeogénesis (la producción de glucosa a partir de fuentes no carbohidratos, como las proteínas). Un exceso de glucosa, incluso si no proviene de la dieta, puede elevar la insulina y reducir la producción de cetonas, sacándote del estado de cetosis. Gestionar el estrés es, por lo tanto, una estrategia metabólica directa para mantener el estado de quema de grasa y evitar el almacenamiento inducido por el cortisol.</p>
+                        <h4 class="font-semibold text-white">8. Entrenamiento de Fuerza: El Motor de tu Metabolismo 🏋️‍♀️</h4>
+                        <p><b>Por qué:</b> El entrenamiento de fuerza es una herramienta poderosa para acelerar el metabolismo a largo plazo. Al construir masa muscular magra, aumentas la cantidad de tejido metabólicamente activo en tu cuerpo. Esto se traduce en una mayor tasa metabólica en reposo, lo que significa que quemas más calorías incluso cuando no estás haciendo ejercicio. Además, el entrenamiento de fuerza mejora la sensibilidad a la insulina, un beneficio clave que se alinea perfectamente con los objetivos de la dieta cetogénica.</p>
+                        <h4 class="font-semibold text-white">9. Ejercicios en Ayunas: Maximizando la Quema de Grasa 🔥🏃‍♂️</h4>
+                        <p><b>Por qué:</b> En un estado de ayuno, tus niveles de insulina están bajos y tus reservas de glucógeno están agotadas. Este entorno hormonal es ideal para la lipólisis. Al realizar ejercicio en ayunas, tu cuerpo se ve obligado a recurrir a sus reservas de grasa para obtener energía. Este método no es para todos y debe ser abordado con precaución, pero es una forma científicamente validada de maximizar la quema de grasa y mejorar la capacidad del cuerpo para usar la grasa como combustible.</p>
+                        <h4 class="font-semibold text-white">10. HIIT (Entrenamiento de Intervalos de Alta Intensidad): La Deuda de Oxígeno 💨</h4>
+                        <p><b>Por qué:</b> El HIIT, o entrenamiento de intervalos de alta intensidad, es una forma de ejercicio que causa un fenómeno conocido como EPOC (Exceso de Consumo de Oxígeno Post-ejercicio). Los breves e intensos estallidos de actividad crean una "deuda de oxígeno" que tu cuerpo debe pagar después del entrenamiento. Este proceso mantiene tu metabolismo elevado y quemando calorías y grasa a un ritmo acelerado durante horas después de haber terminado de entrenar. El HIIT también mejora la sensibilidad a la insulina y la función mitocondrial, haciendo que tu metabolismo sea más eficiente.</p>
+                        <h4 class="font-semibold text-white">11. Ayuno Intermitente: La Limpieza Celular y la Resiliencia Metabólica ⏳</h4>
+                        <p><b>Por qué:</b> El ayuno intermitente es un patrón de alimentación que potencia la cetosis al prolongar el tiempo en el que tu cuerpo tiene bajos niveles de insulina. Esto no solo maximiza la quema de grasa, sino que también activa la autofagia, un proceso de limpieza y reciclaje celular en el que el cuerpo elimina componentes dañados y disfuncionales. La autofagia es un mecanismo clave para la salud celular, la prevención de enfermedades y la longevidad. Al combinar el ayuno intermitente con la cetosis, creas un entorno metabólico óptimo para la resiliencia y la reparación.</p>
+                    </div></div>
+                </div>
+            </section>
+
+            <section id="beneficios-keto" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>🏆 Beneficios Keto</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-3">
+                        <p><b>1. Pérdida de Peso Sostenida y Eficiente 📉</b> El beneficio más conocido de la dieta cetogénica es su capacidad para promover una pérdida de peso efectiva. Esto ocurre a través de múltiples mecanismos:
+
+Supresión del apetito: Los cuerpos cetónicos, especialmente el beta-hidroxibutirato (BHB), actúan como señales que modulan el apetito. El BHB puede influir en las hormonas reguladoras del hambre, como la grelina, lo que lleva a una sensación de saciedad más duradera. Además, la alta ingesta de grasas y proteínas en la dieta keto contribuye a una mayor saciedad postprandial.
+
+Aumento de la termogénesis: La conversión de ácidos grasos en cetonas y el uso de cetonas como energía son procesos metabólicamente costosos. Este aumento en el gasto energético basal, conocido como termogénesis, puede contribuir a una quema de calorías ligeramente superior.
+
+Efecto diurético inicial: En las primeras etapas de la dieta, la depleción de las reservas de glucógeno muscular y hepático (la forma de almacenamiento de glucosa) provoca una pérdida significativa de agua, ya que cada gramo de glucógeno está unido a aproximadamente 3-4 gramos de agua.</p><p><b>2. Mejora del Rendimiento Cognitivo 🧠: </b> El cerebro es un órgano altamente demandante de energía. Aunque la glucosa es su combustible preferido, los cuerpos cetónicos son una excelente fuente de energía alternativa. Cuando el cerebro se adapta a la cetosis, los beneficios pueden ser notables:
+
+Fuente de energía estable y eficiente: A diferencia de la glucosa, cuyos niveles en sangre pueden fluctuar, los cuerpos cetónicos proporcionan un suministro de energía constante y estable al cerebro. Esto puede ayudar a eliminar la "neblina cerebral" (brain fog) y mejorar el enfoque y la concentración.
+
+Efectos neuroprotectores: El beta-hidroxibutirato (BHB) no es solo una molécula de energía; también actúa como una molécula señalizadora. Se ha demostrado que el BHB puede:
+
+Reducir el estrés oxidativo al aumentar la producción de antioxidantes endógenos.
+
+Modular la expresión de genes que promueven la supervivencia neuronal.
+
+Aumentar la producción de mitocondrias (las "centrales eléctricas" de las células) en las neuronas.</p><p><b>3. Reducción de la Resistencia a la Insulina y Control Glucémico 🩸: </b> La dieta cetogénica es una herramienta poderosa para el manejo de condiciones metabólicas como la diabetes tipo 2 y la resistencia a la insulina. Al restringir drásticamente los carbohidratos, se minimiza el estímulo para la liberación de insulina, lo que permite que los niveles de esta hormona se mantengan bajos y estables.
+
+Mejora de la sensibilidad a la insulina: La reducción de la glucosa circulante y la insulina constante permite que los receptores de insulina en las células recuperen su sensibilidad. Esto significa que el cuerpo necesita producir menos insulina para regular la glucosa, rompiendo el ciclo de hiperinsulinemia y resistencia a la insulina.
+
+Reducción de la HbA1c: Para las personas con diabetes tipo 2, la dieta cetogénica ha demostrado ser eficaz en la reducción de los niveles de hemoglobina glicosilada (HbA1c), un marcador clave del control glucémico a largo plazo.</p><p><b>4. Beneficios Terapéuticos y Potencial Antiepiléptico 💊: </b> La dieta cetogénica fue desarrollada originalmente en la década de 1920 como una terapia para la epilepsia resistente a los medicamentos, y sigue siendo una herramienta clínica válida en la actualidad.
+
+Estabilización neuronal: El mecanismo exacto no se conoce por completo, pero se cree que los cuerpos cetónicos tienen un efecto anticonvulsivo al influir en la excitabilidad neuronal. Pueden modular la función de los neurotransmisores, como el GABA (gamma-aminobutirato), que es el principal neurotransmisor inhibidor del cerebro.
+
+Aplicaciones en otras condiciones: Además de la epilepsia, la cetosis nutricional está siendo investigada como una terapia adyuvante para una variedad de condiciones neurológicas, incluyendo la enfermedad de Alzheimer, la enfermedad de Parkinson y las lesiones cerebrales traumáticas. Esto se basa en la capacidad de los cuerpos cetónicos para mejorar la función mitocondrial y reducir el estrés oxidativo.</p><p><b>✨ Otras mejoras:</b> Reducción de la inflamación: La cetosis puede ayudar a reducir los marcadores inflamatorios en el cuerpo. Mejora en el acné: Algunas personas experimentan una reducción del acné al seguir una dieta cetogénica. Aumento de la energía: Muchas personas reportan sentirse más energéticas y mentalmente claras al seguir una dieta cetogénica.</p><div class="pt-4 flex justify-center"><a href="https://fisiosem.my.canva.site/beneficios" target="_blank" class="bg-gradient-to-r from-purple-500 to-cyan-400 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg">¡Más Beneficios!</a></div></div></div>
+                </div>
+            </section>
+
+            <section id="estrategias-sociales" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>🥂 Estrategias para Eventos Sociales</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p>La clave para mantenerte en cetosis en situaciones sociales es una combinación de preparación proactiva, elección informada y manejo discreto. Aquí te presento una hoja de ruta contundente: 🥂</p><h4 class="font-semibold text-white">1. 🛡️ Preparación Pre-Evento: Tu Defensa Metabólica</h4><p><b>Ayuno Estratégico ("Front-Loading" el Ayuno):</b> Si sabes que tendrás un evento o una comida significativa por la tarde o noche, extiende tu ayuno matutino. Por ejemplo, si normalmente haces 16/8, ese día apunta a un 18/6 o incluso 20/4. Esto te dará un "margen de carbohidratos" y calórico más amplio en tu ventana de alimentación, facilitando la inclusión de alguna elección menos estricta sin salir de cetosis.<br><b>Comida Previa Rica en Grasas y Proteínas:</b> Si el evento no cae dentro de tu ventana de ayuno extendido, asegúrate de que tu última comida antes de salir sea altamente saciante y cetogénica. Piensa en una buena porción de proteínas (salmón graso, carne roja) y grasas saludables (aguacate, aceite de oliva virgen extra, frutos secos). Esto minimiza el hambre y los antojos una vez que estés en el evento.<br><b>Hidratación con Electrolitos: Tu Columna Vertebral:</b> Antes de salir, consume una cantidad generosa de tu mezcla de agua mineral, sal de mar y limón. La deshidratación y el desequilibrio electrolítico pueden simular hambre o antojos. Mantenerte hidratado y con electrolitos balanceados te da una base sólida de energía y claridad mental para tomar mejores decisiones.</p><h4 class="font-semibold text-white">2. 🕵️‍♂️ Navegando Eventos Sociales (Fiestas, Reuniones)</h4><p><b>Escaneo Estratégico del Buffet/Mesa:</b> Antes de servirte, haz un reconocimiento rápido de todas las opciones disponibles. Identifica las proteínas puras, las grasas obvias y los vegetales bajos en carbohidratos.<br><b>Prioriza Proteínas y Grasas sin Carb.</b><br><b>Carnes y Pescados:</b> Opta por cortes de carne, pollo o pescado asados, a la parrilla o al horno sin salsas dulces. Si hay embutidos o quesos, son excelentes opciones.<br><b>Grasas Saludables:</b> Aceitunas, aguacate (si disponible), frutos secos (con moderación por su conteo neto de carbohidratos).<br><b>Vegetales Inteligentes:</b> Busca vegetales de hoja verde (espinacas, lechugas) y vegetales crucíferos (brócoli, coliflor). Evita: Vegetales con almidón (papa, maíz, zanahoria cocida en exceso) y ensaladas con frutas, crutones o aderezos azucarados. Pide siempre aderezos simples como aceite de oliva y vinagre.<br><b>Gestión de Salsas y Aderezos:</b> Asume que la mayoría de las salsas y marinadas contienen azúcar o almidón. Sé cauteloso. Si no estás seguro, pídelas aparte o evita directamente los platos que parezcan muy "salseados".<br><b>Bebidas: Tu Zona de Control:</b> La Opción Primaria: Agua mineral (pura o con gas y un chorrito de limón/lima). Café/Té: Negros, sin azúcar ni leche. Alcohol (con Precaución Extrema): Si optas por beber, elige destilados puros (vodka, gin, tequila, whisky) con mezcladores sin azúcar (agua con gas, soda dietética) o vinos secos (tinto o blanco, limitando la cantidad). Evita cervezas, cócteles dulces y licores con jarabes. Ten en cuenta que el alcohol interrumpe temporalmente la quema de grasa y puede bajar tus inhibiciones, llevando a peores elecciones alimentarias. Hidrátate con agua entre cada bebida alcohólica.<br><b>Estrategia Social Discreta:</b> No tienes que dar explicaciones detalladas. Un simple "No, gracias", o "Estoy bien así" es suficiente. Cambia de posición si estás cerca de tentaciones constantes.</p></div></div>
+                </div>
+            </section>
+
+            <section id="lista-compras" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>🛒 Lista de compras</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-700 text-gray-400">
+                            <div class="text-center mb-6">
+                                <p class="text-lg text-purple-300 italic mb-2">"Cada elección saludable es un acto de amor propio. ¡Estás invirtiendo en tu bienestar!"</p>
+                                <p class="text-gray-300">Elige los alimentos de esta lista, descárgalos en PDF y ya tienes tu lista de compras para tu supermercado.</p>
+                            </div>
+                            <div id="shopping-list-container">
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🥑 GRASAS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item1"><label for="item1">Aceite de coco extra virgen</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item2"><label for="item2">Aceite de oliva extra virgen (aove)</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item3"><label for="item3">Aceitunas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item5"><label for="item5">Aceite de palta extra virgen</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item7"><label for="item7">Mantequilla</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item8"><label for="item8">Mantequilla de coco orgánico</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item9"><label for="item9">Pescado azul (salmón, sardinas, etc.)</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item10"><label for="item10">Mantequilla Clarificada o Ghee</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item11"><label for="item11">Cacao 100%</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item12"><label for="item12">Chocolate negro o semillas de cacao puro</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🌰 FRUTOS SECOS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item13"><label for="item13">Almendras</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item14"><label for="item14">Avellanas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item15"><label for="item15">Nueces pecanas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item16"><label for="item16">Nueces de castilla</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item17"><label for="item17">Nueces de Brasil</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item18"><label for="item18">Nueces de macadamias</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item19"><label for="item19">Pistachos</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🌱 SEMILLAS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item20"><label for="item20">Maravilla o girasol</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item21"><label for="item21">Zapallo o pepas de calabaza</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item22"><label for="item22">Chía</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item23"><label for="item23">Cáñamo</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item24"><label for="item24">Sésamo</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item25"><label for="item25">Lino</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🥩 PROTEÍNAS</h4>
+                                    <p class="font-medium text-gray-300 mt-2 mb-1">Pescados:</p>
+                                    <div class="shopping-item"><input type="checkbox" id="item27"><label for="item27">Caballa</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item28"><label for="item28">Anchoas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item29"><label for="item29">Atún</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item30"><label for="item30">Salmón salvaje</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item31"><label for="item31">Sardinas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item32"><label for="item32">Arenques</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item33"><label for="item33">Mariscos</label></div>
+                                    <p class="font-medium text-gray-300 mt-2 mb-1">Carnes:</p>
+                                     <div class="shopping-item"><input type="checkbox" id="item35"><label for="item35">Tocino</label></div>
+                                     <div class="shopping-item"><input type="checkbox" id="item36"><label for="item36">Pollo</label></div>
+                                     <div class="shopping-item"><input type="checkbox" id="item37"><label for="item37">Res</label></div>
+                                     <div class="shopping-item"><input type="checkbox" id="item38"><label for="item38">Pavo</label></div>
+                                     <div class="shopping-item"><input type="checkbox" id="item39"><label for="item39">Cerdo</label></div>
+                                     <div class="shopping-item"><input type="checkbox" id="item40"><label for="item40">Cordero</label></div>
+                                     <p class="font-medium text-gray-300 mt-2 mb-1">Otros:</p>
+                                     <div class="shopping-item"><input type="checkbox" id="item41"><label for="item41">Huevos (idealmente de campo)</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🧀 LÁCTEOS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item43"><label for="item43">Queso Mozzarella</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item44"><label for="item44">Queso Gouda</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item45"><label for="item45">Queso Crema</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item46"><label for="item46">Queso Chanco</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item47"><label for="item47">Queso Fresco</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item48"><label for="item48">Queso Parmesano</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item49"><label for="item49">Queso Dubliner</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item50"><label for="item50">Queso Cheddar</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item51"><label for="item51">Queso Brie</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item52"><label for="item52">Queso Feta</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item53"><label for="item53">Crema Espesa en tarro</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item54"><label for="item54">Yogurt de pajaritos o Kéfir</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🥦 VERDURAS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item55"><label for="item55">Acelgas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item56"><label for="item56">Algas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item57"><label for="item57">Apio</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item58"><label for="item58">Ajo</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item59"><label for="item59">Ajíes</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item60"><label for="item60">Achicoria</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item61"><label for="item61">Berenjena</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item62"><label for="item62">Brócoli</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item63"><label for="item63">Cebolla</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item64"><label for="item64">Coliflor</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item65"><label for="item65">Espinacas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item66"><label for="item66">Espárragos</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item67"><label for="item67">Lechuga</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item68"><label for="item68">Pimentón</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item69"><label for="item69">Rúcula</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item70"><label for="item70">Repollo</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item71"><label for="item71">Setas y Hongos</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item72"><label for="item72">Tomates</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item73"><label for="item73">Zapallo Italiano</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item74"><label for="item74">Pepino</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item75"><label for="item75">Rábanos</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">🍓 FRUTAS Y BAYAS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item76"><label for="item76">Coco</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item77"><label for="item77">Limón</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item78"><label for="item78">Palta</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item79"><label for="item79">Frutillas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item80"><label for="item80">Moras</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item81"><label for="item81">Frambuesas</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item82"><label for="item82">Arándanos</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item83"><label for="item83">Grosellas</label></div>
+                                </div>
+                                <div class="shopping-category">
+                                    <h4 class="font-semibold text-white mb-2">💧 HIDRATACIÓN Y BEBIDAS</h4>
+                                    <div class="shopping-item"><input type="checkbox" id="item84"><label for="item84">Agua mineral (con/sin gas)</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item87"><label for="item87">Café grano o molido</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item88"><label for="item88">Café orgánico</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item89"><label for="item89">Yerba mate</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item90"><label for="item90">Té</label></div>
+                                    <div class="shopping-item"><input type="checkbox" id="item91"><label for="item91">Sal de mar</label></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-5 mt-4 flex flex-col md:flex-row flex-wrap gap-4 justify-center items-center">
+                            <a href="https://ketoorigins-recetas.netlify.app/" target="_blank" class="recipe-button text-white font-bold rounded-full hover:opacity-90 transition-opacity flex items-center justify-center text-lg">
+                                <div class="recipe-btn-img-wrapper">
+                                    <div class="recipe-btn-img-inner">
+                                        <img src="https://i.ibb.co/xtWMQ9mm/Copia-de-Logo-500-x-500-px-4.png" alt="Recetas" class="recipe-btn-img">
+                                    </div>
+                                </div>
+                                <span>RECETAS KETO Origins</span>
+                            </a>
+                             <a href="https://fisiosem.my.canva.site/que-comer-peso-normal" target="_blank" class="bg-gradient-to-r from-amber-500 to-red-600 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg">
+                                 ¿Qué Comer?
+                            </a>
+                            <button id="download-list-btn" class="bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity text-lg">
+                                Descargar Selección
+                            </button>
+                            <a href="https://fisiosem.my.canva.site/keto-origins-" target="_blank" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg">
+                                Nuestras Asesorías
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="niveles-cetonas" class="content-section hidden">
+                <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>🧪 Niveles de Cetonas</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                    <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
+                        <p class="mb-4">La medición de cetonas es una herramienta útil para monitorear el estado metabólico, especialmente en el contexto de dietas bajas en carbohidratos como la dieta cetogénica. A continuación, se detalla la interpretación de cada rango.</p>
+                        <div class="p-4 rounded-lg bg-gray-700/50 border border-gray-500 space-y-2">
+                            <p class="font-bold text-white">⚪️ &lt; 0.5 mmol/L: Estado Metabólico No Cetogénico</p>
+                            <p>Este rango, que incluye niveles de cetonas por debajo de 0.5 mmol/L (milimoles por litro), representa el estado metabólico basal en la mayoría de la población. En este escenario, el cuerpo utiliza principalmente la glucosa como sustrato energético primario. La glucosa, derivada de la digestión de carbohidratos, es la fuente de energía preferida para la mayoría de los tejidos, incluyendo el cerebro. Los niveles bajos de cetonas son completamente normales y esperados en una dieta que incluye carbohidratos, grasas y proteínas en proporciones típicas. En este estado, la lipólisis (descomposición de grasas) y la posterior oxidación de ácidos grasos son procesos que ocurren, pero no a una tasa que genere una acumulación significativa de cuerpos cetónicos.</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-blue-900/50 border border-blue-700 space-y-2">
+                            <p class="font-bold text-white">🔵 0.5 a 1.5 mmol/L: Cetosis Nutricional Leve (Cetosis Fisiológica)</p>
+                            <p>Cuando los niveles de cetonas en sangre se encuentran entre 0.5 y 1.5 mmol/L, se considera que el cuerpo ha entrado en un estado de cetosis nutricional leve. Este es el umbral para lo que se denomina cetosis fisiológica, donde el cuerpo comienza a utilizar cuerpos cetónicos (principalmente acetoacetato, beta-hidroxibutirato y acetona) como una fuente de energía suplementaria a la glucosa. Este cambio metabólico ocurre cuando la disponibilidad de glucosa es limitada, obligando al hígado a producir cetonas a partir de ácidos grasos.</p>
+                            <p>A este nivel, la quema de grasa se intensifica. El cerebro y otros tejidos ahora pueden utilizar tanto glucosa como cetonas para obtener energía, lo que puede contribuir a la pérdida de peso gradual y controlada. Es un error común pensar que la pérdida de peso en este rango se debe exclusivamente a la pérdida de agua; si bien una fase inicial de la dieta cetogénica puede llevar a una pérdida de agua debido a la depleción de glucógeno, la cetosis nutricional sostenida conduce a una quema de grasa real y efectiva.</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-green-900/50 border border-green-600 space-y-2">
+                            <p class="font-bold text-white">🟢 1.5 a 3.0 mmol/L: Cetosis Óptima</p>
+                            <p>Este es el rango objetivo para la mayoría de las personas que siguen una dieta cetogénica con fines terapéuticos o de pérdida de peso. Se conoce como cetosis nutricional óptima. A estos niveles, el cuerpo ha realizado una transición metabólica completa, adaptándose a utilizar los cuerpos cetónicos como la principal fuente de energía. El cerebro, en particular, se vuelve muy eficiente en el uso de cetonas, lo que a menudo se asocia con mayor claridad mental y una reducción del "cerebro de neblina" (brain fog). La lipólisis y la beta-oxidación (proceso de descomposición de ácidos grasos) están en su máxima expresión, lo que facilita una pérdida de grasa más eficiente.</p>
+                            <p>Mantenerse en este rango indica que la dieta está siendo exitosa y que la restricción de carbohidratos es suficiente para mantener un estado cetogénico constante. Es importante recalcar que el nivel óptimo no es necesariamente el nivel más alto; este rango representa un equilibrio ideal entre la producción de cetonas y su uso eficiente por parte del cuerpo.</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-yellow-900/50 border border-yellow-600 space-y-2">
+                            <p class="font-bold text-white">🟡 &gt; 3.0 mmol/L: Cetosis Profunda y Señales de Alerta</p>
+                            <p>Los niveles de cetonas que superan los 3.0 mmol/L entran en un área de precaución. Si bien aún se considera cetosis nutricional en personas sanas, es una señal de que la producción de cetonas es muy alta, posiblemente superior a la capacidad del cuerpo para utilizarlas. Esto puede ser un indicador de varios factores:</p>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li><b>Deshidratación:</b> La falta de hidratación adecuada concentra las cetonas en la sangre, elevando falsamente su lectura.</li>
+                                <li><b>Aporte calórico insuficiente:</b> Un déficit calórico extremo puede forzar al cuerpo a un estado de cetosis muy profunda, lo que puede no ser sostenible a largo plazo y puede llevar a la pérdida de masa muscular.</li>
+                                <li><b>Enfermedades subyacentes:</b> En ciertos contextos clínicos, un nivel muy alto de cetonas puede ser un síntoma de una condición no diagnosticada.</li>
+                            </ul>
+                            <p>Es vital entender que un nivel de cetonas por encima de 3.0 mmol/L no mejora necesariamente la quema de grasa y puede, en algunos casos, ser contraproducente. La clave es el equilibrio.</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-red-900/50 border border-red-700 space-y-2">
+                            <p class="font-bold text-white">🔴 &gt; 8.0 mmol/L: Cetoacidosis (Emergencia Médica)</p>
+                            <p>Este es un punto crítico y de máxima alerta. Un nivel de cetonas por encima de 8.0 mmol/L, especialmente cuando se acompaña de hiperglucemia (niveles altos de glucosa en sangre), es un fuerte indicativo de cetoacidosis diabética (CAD). La cetoacidosis es una emergencia médica que ocurre típicamente en pacientes con diabetes tipo 1 debido a una deficiencia severa de insulina. Sin insulina, las células no pueden absorber glucosa y el cuerpo se ve obligado a descomponer las grasas de manera incontrolada, generando una acumulación masiva y peligrosa de cuerpos cetónicos, lo que acidifica la sangre y puede llevar a coma e incluso la muerte.</p>
+                            <p>Es crucial no confundir la cetosis nutricional (un estado metabólico controlado y fisiológico) con la cetoacidosis (una patología grave). Mientras que la cetosis nutricional es resultado de la restricción de carbohidratos, la cetoacidosis es una falla metabólica asociada a la deficiencia de insulina. Cualquier persona con diabetes tipo 1 que experimente síntomas de cetoacidosis (náuseas, vómitos, sed extrema, respiración rápida y profunda) debe buscar atención médica de emergencia inmediatamente.</p>
+                        </div>
+                    </div></div>
+                </div>
+            </section>
+            
+        </main>
+    </div>
+
+    <div id="alert-message" class="fixed top-5 right-5 bg-red-600 text-white py-2 px-4 rounded-lg shadow-lg hidden opacity-0 transition-opacity duration-500 z-50"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            const downloadBtn = document.getElementById('download-list-btn');
+            const categoryTitles = document.querySelectorAll('.shopping-category h4');
+            const menuButton = document.getElementById('menu-button');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            // HTML para la imagen que se inyectará dinámicamente
+            const footerImageHTML = `
+            <div class="footer-image-wrapper">
+                <div class="gradient-border">
+                    <div class="bg-[#161B22] p-2 rounded-full">
+                        <img src="https://i.ibb.co/1VDjThy/Copia-de-Copia-de-Copia-de-Logo-500-x-500-px-4.png" alt="Logo de Keto Origins" class="footer-image">
+                    </div>
+                </div>
+            </div>`;
+
+            function showMessage(text) {
+                const messageBox = document.getElementById('alert-message');
+                if (!messageBox) return;
+                messageBox.textContent = text;
+                messageBox.classList.remove('hidden', 'opacity-0');
+                messageBox.classList.add('opacity-100');
+                setTimeout(() => {
+                    messageBox.classList.remove('opacity-100');
+                    messageBox.classList.add('opacity-0');
+                    setTimeout(() => {
+                        messageBox.classList.add('hidden');
+                    }, 500);
+                }, 3000);
+            }
+
+            function handleNavigation(targetId) {
+                navLinks.forEach(l => l.classList.remove('active-link'));
+                const activeLink = document.querySelector(`a[href="#${targetId}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active-link');
+                }
+
+                contentSections.forEach(section => {
+                    section.classList.add('hidden');
+                    const existingImage = section.querySelector('.footer-image-wrapper');
+                    if (existingImage) {
+                        existingImage.remove();
+                    }
+                });
+                
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                    targetSection.insertAdjacentHTML('beforeend', footerImageHTML);
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    handleNavigation(targetId);
+                    if (window.innerWidth < 768) {
+                        mobileNav.classList.remove('open');
+                    }
+                });
+            });
+
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const content = this.nextElementSibling;
+                    this.classList.toggle('open');
+                    content.classList.toggle('open');
+                });
+            });
+            
+            categoryTitles.forEach(title => {
+                title.addEventListener('click', function() {
+                    const category = this.parentElement;
+                    const checkboxes = category.querySelectorAll('input[type="checkbox"]');
+                    const areAnyUnchecked = Array.from(checkboxes).some(cb => !cb.checked);
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = areAnyUnchecked;
+                    });
+                });
+            });
+
+            downloadBtn.addEventListener('click', function() {
+                if (typeof window.jspdf === 'undefined') {
+                    showMessage("Error al cargar la funcionalidad PDF. Inténtalo de nuevo.");
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const checkedItems = document.querySelectorAll('#shopping-list-container input[type="checkbox"]:checked');
+                if (checkedItems.length === 0) {
+                    showMessage("Por favor, selecciona al menos un artículo para descargar.");
+                    return; 
+                }
+
+                let y = 20;
+                const lineHeight = 7;
+                const pageHeight = 280;
+                const leftMargin = 15;
+
+                doc.setFontSize(20);
+                doc.text('Mi Lista de Compras Keto', leftMargin, y);
+                y += 15;
+
+                const categories = {};
+
+                checkedItems.forEach(item => {
+                    const parent = item.closest('.shopping-category');
+                    let categoryTitle = 'General';
+                    if (parent) {
+                        const categoryTitleElement = parent.querySelector('h4, p');
+                        if (categoryTitleElement) {
+                            // Regex para eliminar emojis y dejar el texto limpio
+                            categoryTitle = categoryTitleElement.textContent.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').trim();
+                        }
+                    }
+                    const itemName = item.nextElementSibling.textContent.trim();
+                    if (!categories[categoryTitle]) {
+                        categories[categoryTitle] = [];
+                    }
+                    categories[categoryTitle].push(itemName);
+                });
+
+                for (const category in categories) {
+                    if (y > pageHeight - 20) { // Salto de página
+                        doc.addPage();
+                        y = 20;
+                    }
+                    doc.setFontSize(16);
+                    doc.text(category, leftMargin, y);
+                    y += lineHeight + 3;
+
+                    doc.setFontSize(12);
+                    categories[category].forEach(item => {
+                        if (y > pageHeight - 10) { // Salto de página
+                            doc.addPage();
+                            y = 20;
+                        }
+                        doc.text(`- ${item}`, leftMargin + 5, y);
+                        y += lineHeight;
+                    });
+                    y += 5;
+                }
+
+                doc.save('lista-de-compras-keto.pdf');
+            });
+            
+            menuButton.addEventListener('click', () => {
+                mobileNav.classList.toggle('open');
+            });
+
+            const initialTargetId = window.location.hash.substring(1) || 'introduccion';
+            handleNavigation(initialTargetId);
+        });
+    </script>
+</body>
+</html>
