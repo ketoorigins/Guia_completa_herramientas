@@ -36,6 +36,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            right: 0;
             bottom: 0;
             width: 4px;
             background: linear-gradient(180deg, #4C93FF, #A64BFF);
@@ -183,42 +184,49 @@
             text-fill-color: transparent;
             text-shadow: none;
         }
+
         .recipe-button {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding: 0.5rem 1.5rem;
+            justify-content: center;
+            padding: 10px 20px;
             border-radius: 9999px;
             font-weight: 700;
             color: white;
             background: linear-gradient(to right, #581c87, #8a2be2);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2), 0 0 10px rgba(138, 43, 226, 0.5);
-            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 0 15px rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
             text-decoration: none;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
         }
         .recipe-button:hover {
             transform: translateY(-2px) scale(1.02);
             box-shadow: 0 8px 12px rgba(0,0,0,0.3), 0 0 15px rgba(138, 43, 226, 0.7);
         }
         .recipe-btn-img-wrapper {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             padding: 2px;
-            border-radius: 9999px;
+            border-radius: 50%;
             background: linear-gradient(to right, #d946ef, #8b5cf6);
-            margin-right: 1rem;
-            width: 72px;
-            height: 72px;
+            margin-right: 12px;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
             box-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
         }
         .recipe-btn-img-inner {
             background-color: #2a1735;
-            padding: 10px;
-            border-radius: 9999px;
+            border-radius: 50%;
             width: 100%;
             height: 100%;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .recipe-btn-img {
             display: block;
@@ -372,7 +380,6 @@
         </aside>
 
         <main id="main-content" class="flex-1 p-6 md:p-10 overflow-y-auto">
-            
             <section id="introduccion" class="content-section">
                 <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
                     <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>📖 Introducción</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
@@ -704,11 +711,11 @@
                     <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
                         <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-white"><span>2. Omega-3 (EPA y DHA) 🐟</span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
                         <div class="accordion-content"><div class="p-5 border-t border-gray-700 text-gray-400 space-y-4">
-                           <p>Los Omega-3 (EPA y DHA) son ácidos grasos poliinsaturados esenciales que actúan como precursores de mediadores lipídicos y como componentes estructurales de las membranas celulares. A nivel molecular, el EPA (Ácido Eicosapentaenoico) compite con el ácido araquidónico (Omega-6) por las enzimas ciclooxigenasa y lipooxigenasa, resultando en la producción de eicosanoides menos proinflamatorios. Además, el EPA y el DHA (Ácido Docosahexaenoico) son sustratos para la síntesis de mediadores lipídicos pro-resolución especializados (SPMs), como las resolvinas, protectinas y maresinas. Estas moléculas no solo detienen la inflamación, sino que promueven activamente su resolución, un proceso crucial para la salud cardiovascular y la prevención de enfermedades crónicas.</p>
-                           <p>El DHA es el ácido graso más abundante en las membranas del cerebro y la retina 🧠. Es vital para mantener la fluidez de la membrana celular y la estructura de los microdominios lipídicos (rafts), que son esenciales para la señalización celular y la función sináptica. Esto se traduce en una mejora en la neuroplasticidad, la memoria, la función cognitiva y el desarrollo neuronal.</p>
-                           <h4 class="font-semibold text-white">Diferencia entre Omega-3 del Mar y de las Plantas</h4>
-                           <p>El ALA (Ácido Alfa-Linolénico), el Omega-3 de las plantas, debe ser convertido en EPA y DHA por el cuerpo. Sin embargo, esta vía metabólica es extremadamente ineficiente, con una tasa de conversión a DHA inferior al 1% en la mayoría de los humanos. Por esta razón, el ALA no es un sustituto efectivo, y los Omega-3 marinos son la única fuente biodisponible.</p>
-                           <div class="consumo-info"><b>Guía de Consumo:</b> Por ser liposoluble, debe ser consumido con una comida que contenga grasa para una absorción óptima.</div>
+                            <p>Los Omega-3 (EPA y DHA) son ácidos grasos poliinsaturados esenciales que actúan como precursores de mediadores lipídicos y como componentes estructurales de las membranas celulares. A nivel molecular, el EPA (Ácido Eicosapentaenoico) compite con el ácido araquidónico (Omega-6) por las enzimas ciclooxigenasa y lipooxigenasa, resultando en la producción de eicosanoides menos proinflamatorios. Además, el EPA y el DHA (Ácido Docosahexaenoico) son sustratos para la síntesis de mediadores lipídicos pro-resolución especializados (SPMs), como las resolvinas, protectinas y maresinas. Estas moléculas no solo detienen la inflamación, sino que promueven activamente su resolución, un proceso crucial para la salud cardiovascular y la prevención de enfermedades crónicas.</p>
+                            <p>El DHA es el ácido graso más abundante en las membranas del cerebro y la retina 🧠. Es vital para mantener la fluidez de la membrana celular y la estructura de los microdominios lipídicos (rafts), que son esenciales para la señalización celular y la función sináptica. Esto se traduce en una mejora en la neuroplasticidad, la memoria, la función cognitiva y el desarrollo neuronal.</p>
+                            <h4 class="font-semibold text-white">Diferencia entre Omega-3 del Mar y de las Plantas</h4>
+                            <p>El ALA (Ácido Alfa-Linolénico), el Omega-3 de las plantas, debe ser convertido en EPA y DHA por el cuerpo. Sin embargo, esta vía metabólica es extremadamente ineficiente, con una tasa de conversión a DHA inferior al 1% en la mayoría de los humanos. Por esta razón, el ALA no es un sustituto efectivo, y los Omega-3 marinos son la única fuente biodisponible.</p>
+                            <div class="consumo-info"><b>Guía de Consumo:</b> Por ser liposoluble, debe ser consumido con una comida que contenga grasa para una absorción óptima.</div>
                         </div></div>
                     </div>
                     <div class="accordion-item bg-[#161B22] rounded-lg border border-gray-800">
@@ -789,7 +796,7 @@
                             <p>Más allá de su función energética, la creatina tiene otras propiedades importantes:</p>
                             <ul class="list-disc list-inside space-y-2">
                                 <li><b>Efecto Osmolítico:</b> La creatina atrae agua hacia el interior de las células musculares, un fenómeno conocido como hinchazón celular. Este aumento de volumen no solo mejora la hidratación muscular, sino que también actúa como una señal anabólica, estimulando la síntesis de proteínas y el crecimiento muscular.</li>
-                                <li><b>Amortiguador de pH:</b> Actúa como un tampón intracelular, ayudando a mitigar la acumulación de iones de hidrógeno durante el ejercicio intenso, lo que retrasa la fatiga muscular.</li>
+                                <li><b>Amortiguador de pH:</b> Actúa como un tampón intracelular, ayudando a mitigar la acumulación deiones de hidrógeno durante el ejercicio intenso, lo que retrasa la fatiga muscular.</li>
                                 <li><b>Neuroprotección:</b> El cerebro, un órgano de alto consumo energético, también utiliza el sistema de fosfocreatina para mantener el suministro de ATP. Se ha demostrado que la suplementación con creatina puede tener un efecto neuroprotector, mejorando la bioenergética cerebral.</li>
                             </ul>
                             <div class="consumo-info"><b>Guía de Consumo:</b> La consistencia en el consumo diario es más importante que el momento exacto. Un protocolo común incluye una fase de carga (dosis más altas por 5-7 días) seguida de una fase de mantenimiento. Sin embargo, se sugiere que consumirla después del entrenamiento 🏃 puede ser beneficioso, ya que la liberación de insulina post-ejercicio aumenta la expresión de los transportadores de creatina, facilitando su captación y almacenamiento en el músculo.</div>
@@ -1140,18 +1147,19 @@ Aplicaciones en otras condiciones: Además de la epilepsia, la cetosis nutricion
                         </div>
                         <div class="p-5 mt-8 flex flex-col items-center space-y-6 w-full" style="display: flex !important; flex-direction: column !important;">
 
-                            <a href="https://recetas-keto-origins.netlify.app//" target="_blank" class="recipe-button text-white font-bold rounded-full hover:opacity-90 transition-opacity flex items-center justify-center text-lg">
+                            <a href="https://recetas-keto-origins.netlify.app//" target="_blank" class="recipe-button">
                                 <div class="recipe-btn-img-wrapper">
                                     <div class="recipe-btn-img-inner">
                                         <img src="https://i.ibb.co/xtWMQ9mm/Copia-de-Logo-500-x-500-px-4.png" alt="Recetas" class="recipe-btn-img">
                                     </div>
                                 </div>
                                 <span>RECETAS KETO Origins</span>
+                            </a>
                             
-                            <button id="download-list-btn" class="bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity text-lg">
+                            <button id="download-list-btn" class="bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity text-lg w-full max-w-[320px]">
                                 Descargar Selección
                             </button>
-                            <a href="https://fisiosem.cl/" target="_blank" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg">
+                            <a href="https://fisiosem.cl/" target="_blank" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg w-full max-w-[320px]">
                                 Nuestras Asesorías
                             </a>
                         </div>
@@ -1212,7 +1220,6 @@ Aplicaciones en otras condiciones: Además de la epilepsia, la cetosis nutricion
             const menuButton = document.getElementById('menu-button');
             const mobileNav = document.getElementById('mobile-nav');
 
-            // HTML para la imagen que se inyectará dinámicamente
             const footerImageHTML = `
             <div class="footer-image-wrapper">
                 <div class="gradient-border">
@@ -1325,7 +1332,6 @@ Aplicaciones en otras condiciones: Además de la epilepsia, la cetosis nutricion
                     if (parent) {
                         const categoryTitleElement = parent.querySelector('h4, p');
                         if (categoryTitleElement) {
-                            // Regex para eliminar emojis y dejar el texto limpio
                             categoryTitle = categoryTitleElement.textContent.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').trim();
                         }
                     }
@@ -1337,7 +1343,7 @@ Aplicaciones en otras condiciones: Además de la epilepsia, la cetosis nutricion
                 });
 
                 for (const category in categories) {
-                    if (y > pageHeight - 20) { // Salto de página
+                    if (y > pageHeight - 20) {
                         doc.addPage();
                         y = 20;
                     }
@@ -1347,7 +1353,7 @@ Aplicaciones en otras condiciones: Además de la epilepsia, la cetosis nutricion
 
                     doc.setFontSize(12);
                     categories[category].forEach(item => {
-                        if (y > pageHeight - 10) { // Salto de página
+                        if (y > pageHeight - 10) {
                             doc.addPage();
                             y = 20;
                         }
